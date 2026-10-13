@@ -27,7 +27,7 @@
 
 ## Task status
 
-- **Last successfully completed task:** **DATA-002 — CRUD API**: 38 REST
+- **Last successfully completed task:** **DATA-002 — CRUD API**: 35 REST
   endpoints across 7 routers + a service layer, OpenAPI-documented; guarded
   deletes (household/baseline need `?confirm=true`); baseline protection
   (second baseline → 409; PATCH promotion demotes the old baseline and keeps

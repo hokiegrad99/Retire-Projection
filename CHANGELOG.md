@@ -7,7 +7,7 @@ Format: newest first · dated entries · semantic-ish versions.
 
 ## 0.3.0 — 2026-10-13 — CRUD API over the domain model (DATA-002, Phase 1)
 
-- **API:** 38 REST endpoints (households, plans, people, accounts with
+- **API:** 35 REST endpoints (households, plans, people, accounts with
   allocations, liabilities, income streams, expenses) with OpenAPI docs;
   201/204/404/409/422 semantics and field-level validation details.
 - **Baseline protection:** a second baseline cannot be created (409);

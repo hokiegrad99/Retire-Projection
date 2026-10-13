@@ -167,8 +167,13 @@ OpenAPI-documented REST API with baseline protection and safe deletes.
 **Files created or modified**
 
 - Routers: `backend/app/routers/{households,plans,people,accounts,
-  liabilities,income_streams,expenses}.py` (38 endpoints); registered in
+  liabilities,income_streams,expenses}.py` (35 endpoints); registered in
   `app/main.py`.
+  *(Correction, recorded next session-end check: the first draft of these
+  notes said "38 endpoints"; the OpenAPI schema shows 35 entity endpoints
+  across 15 paths. The commit message of `c1745a6` also says 38 — this
+  entry and PROJECT_STATE/CHANGELOG/IMPLEMENTATION_PLAN carry the correct
+  count.)*
 - Services: `backend/app/services/{__init__,crud}.py` — get_or_404,
   create/patch/delete helpers, merged-record validation, ownership guards,
   baseline promotion.
