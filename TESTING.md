@@ -22,32 +22,38 @@ cd frontend && npx vitest run
 - Tests run **only** against the dedicated database `retirement_test`,
   which is dropped and recreated at the start of each suite
   (`backend/tests/conftest.py`). The live `retirement` database is never
-  touched by tests.
+  touched by tests (and is never downgraded).
 - `DATABASE_URL` is redirected before any app module loads, so the app's
   engine always binds to the test database during tests.
-- No user financial data exists yet (Phase 0 has no domain tables).
+- The `db_session` fixture truncates all eight domain tables after every
+  test, so tests cannot leak rows into each other.
+- The schema exists (migration `0002`) but **no user financial data** has
+  been entered — only synthetic test rows, which are destroyed per test.
 
-## 3. Current suites (observed results, 2026-10-13)
+## 3. Current suites (observed results, 2026-10-13, `make check` exit 0)
 
 | Suite | Count | Result | What it covers |
 | --- | --- | --- | --- |
 | `tests/test_app.py` | 5 | pass | localhost binding default, CORS list parsing, root endpoint, OpenAPI schema, Swagger UI |
-| `tests/test_health.py` | 3 | pass | 200 + healthy body, migration revision visible after upgrade, no credential leakage |
-| `tests/test_migrations.py` | 1 | pass | Alembic upgrade lands revision `0001` |
+| `tests/test_health.py` | 3 | pass | 200 + healthy body, migration revision reported after upgrade (compared against the `expected_head` fixture, never a hardcoded id), no credential leakage |
+| `tests/test_migrations.py` | 2 | pass | head applies cleanly; **downgrade → re-upgrade round trip** (including native enum types) restores the full schema |
+| `tests/test_models_finance.py` | 11 | pass | PostgreSQL backstops: FK cascades (household→plans, plan→children, person→accounts), negative-balance CHECK, per-household single-baseline index, allocation uniqueness, date-order and adjustment-pair CHECKs, enum-value rejection, full-graph persistence/relations |
+| `tests/test_schemas_finance.py` | 25 | pass | DATA-001 input validation: dates, amounts, rates, enums, unknown fields, cross-field rules (survivor pairing, one-time flows, adjustment pairs, allocation sets summing to 1) |
 | `frontend/src/App.test.tsx` | 3 | pass | loading state, renders real health data, actionable error when API unreachable |
-| **Total** | **12** | **all pass** | |
+| **Total** | **49** | **all pass** | |
 
-`make lint` must be clean (currently 0 findings).
+`make lint` must be clean (0 findings; the documented E501 exception for
+generated Alembic revisions is DECISIONS D-013).
 
 Known warning: Starlette `TestClient` emits a deprecation notice about
 `httpx` (KI-002) — cosmetic, tracked.
 
 ## 4. Reference validation plan (financial correctness)
 
-No financial code exists yet. When CALC/TAX/SS work begins, add one file per
-domain under `backend/tests/reference/` containing: source (IRS/state
-publication + year), input fixture, expected output, tolerance, and the
-actual result once executed. Rules:
+No financial **calculations** exist yet. When CALC/TAX/SS work begins, add
+one file per domain under `backend/tests/reference/` containing: source
+(IRS/state publication + year), input fixture, expected output, tolerance,
+and the actual result once executed. Rules:
 
 - A tax/benefit module cannot be marked validated on "plausible-looking
   numbers" alone (spec §20).
@@ -58,6 +64,8 @@ actual result once executed. Rules:
   reconcile to balances; assets−liabilities = net worth; scenario mutation
   never alters baseline; identical seed ⇒ identical simulation; depleted
   accounts never fund spending silently; taxes never double-counted.
+  (Schema-level pieces of these — cascades, baseline protection, constraint
+  rejection — are already covered by `test_models_finance.py`.)
 
 ## 5. Coverage
 
@@ -67,17 +75,19 @@ numbers here. Do not claim coverage percentages until measured.
 
 ## 6. Manual / end-to-end verification
 
-Procedure used in session 1 (repeat after significant changes):
+Procedure used in sessions 1–2 (repeat after significant changes):
 
-1. `make lint && make test` → exit 0.
+1. `make lint && make test` (or `make check`) → exit 0.
 2. `make backend` → then:
    `curl http://127.0.0.1:8010/api/health` (or open in browser) → 200,
-   `"status":"ok"`, `"database":{"connected":true}`.
+   `"status":"ok"`, `"database":{"connected":true}` and a
+   `migration_revision` equal to the current head (session 2 observed
+   `"0002"`).
 3. `make frontend` → open `http://127.0.0.1:5173/` → health card renders
-   with `ok / connected / 0001`; check `/api/health` through port 5173
-   proves the proxy path.
+   with `ok / connected` and the current revision; check `/api/health`
+   through port 5173 to prove the proxy path.
 4. Stop both; confirm ports 8010/5173 are released (`ss -ltn`).
-5. Restart the API and confirm data still there (Phase 1+ acceptance).
+5. Restart the API and confirm saved data persists (Phase 1+ acceptance).
 
 ## 7. End-to-end browser tests
 

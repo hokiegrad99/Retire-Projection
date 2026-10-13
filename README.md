@@ -5,9 +5,10 @@ year-by-year deterministic projections, tax-aware planning, scenario
 comparison, Monte Carlo simulation, and strategy optimizers. You own the data;
 everything runs on your machine with no cloud services and no subscription.
 
-> **Status: Phase 0 complete** (project foundation: repository, continuity
-> documents, database, health-checked API, tested frontend skeleton).
-> The financial features arrive in Phases 1–7 — see `IMPLEMENTATION_PLAN.md`.
+> **Status: Phase 1 in progress.** Phase 0 foundation complete;
+> **DATA-001 financial domain model shipped** (8 tables, migration
+> `0002`, 46 backend + 3 frontend tests). Next: DATA-002 CRUD API.
+> See `IMPLEMENTATION_PLAN.md` for the full roadmap.
 
 ## Documentation index
 

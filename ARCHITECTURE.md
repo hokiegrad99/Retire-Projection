@@ -52,13 +52,36 @@ Hard boundaries:
 
 ## 3. Database schema and relationships
 
-Current schema (revision `0001`): bookkeeping only — `alembic_version`.
-The financial domain model arrives with DATA-001; its design must cover
-spec §6: households → people (roles, DOB, longevity, retirement dates),
-accounts (tax treatment, allocation, fees), liabilities, income streams,
-expenses/budgets, plans/scenarios. Planned relationships: `household 1—*`,
-`plan 1—* scenario` with a protected baseline flag, FKs with RESTRICT on
-financial records, CHECK constraints on amounts/dates.
+Schema revision `0002` (applied to live `retirement`; rebuilt from scratch
+in `retirement_test` for every test run). Eight tables, household-scale:
+
+```
+household 1──* plan (is_baseline: exactly one per household — partial
+              unique index uq_plan_single_baseline_per_household;
+              parent_plan_id: scenario lineage, ON DELETE SET NULL)
+plan      1──* person        (roles: primary | spouse_partner | dependent;
+                              longevity_age 40–120, dependency window)
+plan      1──* account       (24 account types, tax_treatment, balance
+              │              ≥ 0, expected_return_rate/fee_rate as annual
+              │              fractions, ON DELETE CASCADE)
+account   1──* account_allocation (asset_class + weight, unique per
+              │                    account, weight ∈ [0,1])
+plan      1──* liability     (type, balance ≥ 0, rate ∈ [0,1], payoff ≥ start)
+plan      1──* income_stream (owner_person, amount ≥ 0, frequency,
+              │               start ≤ end, growth_rate, basis,
+              │               tax_classification, survivor rules)
+plan      1──* expense       (spending_class, category, amount ≥ 0,
+                              basis, inflation_rate, phase,
+                              adjustment_age ⇔ adjustment_percent)
+```
+
+Design rules: money is `Numeric(20,2)` (Decimal on the Python side), rates
+are annual fractions (`Numeric(9,6)`), enums are native PG types storing the
+*member values* shared with Pydantic (D-014), every FK cascades from its
+owner (D-011 plan-owned snapshots), and `created_at`/`updated_at` exist on
+every table. CHECK constraints are the backstop beneath the Pydantic layer;
+the one rule the DB cannot express (allocation weights summing to 1) is
+enforced at the schema/service layer and tested there.
 
 ## 4. Financial calculation architecture (planned)
 
@@ -120,8 +143,13 @@ seeded RNG.
 
 ## 10. Important limitations (current)
 
-- No financial calculations exist yet; any UI numbers before Phase 1 are
-  service-health facts only.
+- The domain schema exists but no financial **calculations** do yet; UI
+  numbers remain service-health facts only until CALC-001.
+- No API/UI over the domain model yet (DATA-002/UI-002); the schema's
+  deferred elements (goals, employment periods, beneficiary structures)
+  are tracked as DATA-012 (D-012).
+- Allocation-weight completeness is not DB-enforced (needs a trigger);
+  every write path goes through the validated schema instead (D-011).
 - Docker artifacts are written but unexecuted (INFRA-004).
 - Single lockfile mixes runtime/dev Python deps (KI-005).
 - No coverage gate (KI-006), no automated dependency audit yet (SEC-001).

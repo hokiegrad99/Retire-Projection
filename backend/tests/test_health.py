@@ -18,11 +18,13 @@ def test_health_requires_database(client: TestClient, database: str) -> None:
     assert body["timestamp"]
 
 
-def test_health_reports_migration_revision(client: TestClient, migrated_database: str) -> None:
-    """After ``alembic upgrade head`` the baseline revision is visible."""
+def test_health_reports_migration_revision(
+    client: TestClient, migrated_database: str, expected_head: str
+) -> None:
+    """After ``alembic upgrade head`` the current head revision is visible."""
     response = client.get("/api/health")
     assert response.status_code == 200, response.text
-    assert response.json()["database"]["migration_revision"] == "0001"
+    assert response.json()["database"]["migration_revision"] == expected_head
 
 
 def test_health_never_leaks_credentials(client: TestClient, database: str) -> None:

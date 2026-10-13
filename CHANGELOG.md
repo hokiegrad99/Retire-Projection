@@ -5,6 +5,23 @@ Format: newest first · dated entries · semantic-ish versions.
 
 ---
 
+## 0.2.0 — 2026-10-13 — Financial domain model (DATA-001, Phase 1)
+
+- **Schema:** migration `0002` adds 8 tables — `household`, `plan`
+  (baseline/scenario lineage + per-household single-baseline index),
+  `person`, `account` (24 account types, tax treatment, rates),
+  `account_allocation`, `liability`, `income_stream`, `expense` — with
+  FK cascades and CHECK constraints throughout.
+- **Validation:** Pydantic input schemas for every entity (`app/schemas/`):
+  date ordering, non-negative money, rate ranges, survivor-rule pairing,
+  one-time-flow rules, allocation sets summing to 1, adjustment pairs.
+- **Tests:** 36 new (25 schema + 11 model/DB) plus a migration
+  downgrade/re-upgrade round trip; total suite now 46 backend + 3 frontend,
+  all passing; `E2E` health reports `migration_revision: 0002`.
+- Decisions D-011…D-014 recorded (snapshot ownership, deferred schema
+  elements → DATA-012, lint scope, enum representation).
+- No API/UI changes yet — DATA-002 (CRUD API) is next.
+
 ## 0.1.0 — 2026-10-13 — Project foundation (Phase 0)
 
 - Initial repository with the full continuity-documentation system

@@ -18,6 +18,7 @@ BACKEND_DIR = Path(__file__).resolve().parents[1]
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 
+from app import models as _models  # noqa: E402,F401  # registers tables for autogenerate
 from app.config import get_settings  # noqa: E402
 from app.db import Base  # noqa: E402
 

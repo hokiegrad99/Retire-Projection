@@ -94,5 +94,57 @@ appending a new entry that references the old ID.
 
 - Scenario storage model: full copies vs. overlay/diff from baseline —
   decide when DATA-003 starts (materially affects schema and comparison UX).
+  *(Partially resolved by D-011: snapshots by default.)*
 - Splitting runtime vs. dev lockfiles (follow-up of KI-005).
 - Coverage tooling and thresholds (KI-006).
+
+---
+
+## D-011 — 2026-10-13 — Data ownership: a Plan owns its entities (snapshot model)
+
+- **Alternatives:** household-owned entities shared by all scenarios with
+  overlay/diff patches; event-sourced ledger.
+- **Rationale:** spec §13 requires that experimenting never mutates the
+  baseline. Plan-owned rows make isolation *structural* — editing scenario
+  rows cannot touch baseline rows, cascade deletes are exact, and
+  comparisons read self-contained data. Row counts are household-scale, so
+  duplication is cheap. (Supersedes the open half of D-010.)
+- **Consequences:** scenario creation copies rows (DATA-003); the one rule
+  the DB cannot CHECK (allocation weights sum to 1) is enforced in the
+  Pydantic layer and covered by tests; deleting a plan reclaims everything.
+
+## D-012 — 2026-10-13 — Deferred schema elements instead of speculative columns
+
+- **Decision:** financial goals, planning preferences, employment-period
+  ranges, structured survivor/beneficiary assumptions, per-account
+  withdrawal rules, and multi-step spending adjustments are **not** in
+  migration `0002`; they are consolidated as task **DATA-012**.
+- **Alternatives:** invent placeholders now (rejected: premature schema
+  invites redesign once CALC/TAX semantics exist); silently omit (rejected:
+  spec items must be tracked).
+- **Consequences:** `person.retirement_date` and `plan.notes` cover interim
+  needs; FEATURE_MATRIX rows are marked `partial` with explicit gaps;
+  future additions arrive as reviewed migrations with tests.
+
+## D-013 — 2026-10-13 — Lint scope: E501 excepted for Alembic revisions
+
+- **Decision:** `ruff` line-length (100) applies everywhere **except**
+  `alembic/versions/*` (per-file-ignores in `backend/pyproject.toml`).
+- **Alternatives:** hand-wrap generated DDL (reverted by the next
+  autogenerate, creating lint churn every migration); drop E501 project-wide
+  (rejected: hand-written code keeps the rule).
+- **Consequences:** generated enum/constraint lines can be long; all other
+  files remain checked. Revisit if migrations are ever post-processed.
+
+## D-014 — 2026-10-13 — Enum representation: StrEnum storing member values
+
+- **Decision:** domain enums inherit `enum.StrEnum`; columns use a shared
+  `db_enum()` helper with `values_callable` so PostgreSQL stores the
+  lowercase *values* (`'single'`, `'tax_deferred'`) — the same strings
+  Pydantic validates and JSON emits.
+- **Alternatives:** SQLAlchemy's default of storing member *names*
+  (`'SINGLE'`); loose strings + CHECK lists.
+- **Consequences:** one vocabulary across all layers (tested);
+  renaming a stored value later requires an `ALTER TYPE … RENAME VALUE`
+  migration; the PG enum type still rejects unknown values as a backstop
+  (`test_unknown_enum_value_rejected_by_database`).

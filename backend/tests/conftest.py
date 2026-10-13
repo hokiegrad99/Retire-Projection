@@ -90,3 +90,36 @@ def migrated_database(database: str) -> str:
     cfg = Config(str(BACKEND_DIR / "alembic.ini"))
     command.upgrade(cfg, "head")
     return database
+
+
+@pytest.fixture(scope="session")
+def expected_head() -> str:
+    """Current head revision of the migration chain.
+
+    Assertions compare against this instead of a hardcoded revision id so
+    that adding a migration does not spuriously fail unrelated tests.
+    """
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+
+    cfg = Config(str(BACKEND_DIR / "alembic.ini"))
+    head = ScriptDirectory.from_config(cfg).get_current_head()
+    assert head, "migration chain must have a head revision"
+    return head
+
+
+@pytest.fixture()
+def db_session(migrated_database: str):
+    """ORM session on the migrated test database, wiped after each test."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal, engine
+
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.rollback()
+        session.close()
+        with engine.begin() as conn:
+            conn.execute(text("TRUNCATE household RESTART IDENTITY CASCADE"))

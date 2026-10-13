@@ -1,6 +1,6 @@
 [project]
 name = "retire-projection-backend"
-version = "0.1.0"
+version = "0.2.0"
 description = "Backend API, database layer, and financial calculation engine for the Retire Projection retirement planning platform."
 requires-python = ">=3.12"
 dependencies = [
@@ -39,3 +39,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic revisions are mostly machine-generated DDL: wrapping their long
+# enum/constraint lines is throwaway work that the next autogenerate would
+# undo. Style-only exception; all hand-written code keeps the 100-char rule.
+"alembic/versions/*" = ["E501"]
