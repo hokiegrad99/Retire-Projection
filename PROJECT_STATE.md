@@ -17,8 +17,8 @@
 
 | Area | Estimate | Notes |
 | --- | --- | --- |
-| Phase 0 — foundation | 100% (INFRA-004 verified-exception) | Docker artifacts still unexecuted (KI-003) |
-| Phase 1 — MVP planning app | ~15% | DATA-001 done (1 of 8 tasks, but structurally heavy) |
+| Phase 0 — foundation | 95% | Exit criteria met; INFRA-004 still blocked (no Docker host — KI-003) |
+| Phase 1 — MVP planning app | ~15% | DATA-001 done (1 of 9 tasks, but structurally heavy) |
 | Phase 2 — retirement income | 0% | not started |
 | Phase 3 — tax engine | 0% | not started (NJ prioritized) |
 | Phase 4 — risk & simulation | 0% | not started |
