@@ -89,6 +89,7 @@
   (unchanged this session — no schema change was needed for the API).
 - **Latest build & test results (2026-10-13):** `make check` exit 0 —
   ruff clean, tsc clean, 71 backend + 3 frontend tests passed.
-- **Last known-good commit:** session 2 code: `78f9b2f`; session 3 SHA is
-  recorded at the bottom after its commit.
+- **Last known-good commit:** `c1745a6` — session 3 (DATA-002, 25 files,
+  verified by `make check` exit 0 with 71+3 tests and a live HTTP smoke
+  of the full API flow). Previous: `78f9b2f` (session 2).
 - **Version:** 0.3.0 (`backend/app/version.py`, `pyproject.toml`).
