@@ -26,6 +26,10 @@ everything runs on your machine with no cloud services and no subscription.
 | `KNOWN_ISSUES.md` | Confirmed defects and workarounds |
 | `CHANGELOG.md` | User-visible changes |
 
+*Filename note:* the requirements text also refers to some of these under
+variant spellings (`PROJECTSTATE.md`, `IMPLEMENTATIONPLAN.md`,
+`FEATUREMATRIX.md`); the underscored names above are canonical.
+
 ## Quick start (development)
 
 Prerequisites: `uv` (Python toolchain), Node.js 20+, PostgreSQL running

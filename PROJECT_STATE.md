@@ -65,6 +65,20 @@
 - Offline-at-runtime claim: no external runtime resources are referenced by
   the code, but a full offline run has not been tested end-to-end.
 
+## Features partially implemented
+
+- **Frontend dashboard:** only the service-health card exists and renders
+  real API data; net worth, cash-flow, portfolio, and scenario views await
+  CALC-001/UI-001.
+- **Dependency locking:** versions are fully pinned (backend
+  `requirements.lock.txt`, frontend `package-lock.json`), but runtime and
+  dev Python dependencies share one lockfile (KI-005).
+- **Security posture:** localhost binding, CORS allowlist, secret hygiene,
+  and parameterized SQL are in place; authentication, HTTPS, rate
+  limiting, and dependency auditing are not (SECURITY.md, AUTH-001).
+- **Backup/export:** procedure documented in OPERATIONS.md §5 but not yet
+  exercised (DATA-004 / KI-004).
+
 ## Not started
 
 All of Phases 1–7: domain model, projection engine, tax engine, Social

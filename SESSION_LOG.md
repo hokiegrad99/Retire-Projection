@@ -73,3 +73,18 @@ reproducible workflow). Decisions D-001…D-010 recorded.
 
 **Next recommended action:** start session 2 with `make lint && make test`,
 then begin **DATA-001** (financial domain model) per `NEXT_SESSION.md`.
+
+**Session 1 addendum — final completion check (same session)**
+
+- Spec-conformance gaps found and closed: `PROJECT_STATE.md` gained the
+  spec-required "Features partially implemented" category; the requirements'
+  variant document spellings are now documented in `README.md`.
+- Bug found by executing the documented commands: `make setup` failed
+  (`uv venv` exit 2 when `.venv` already exists). Fixed in the Makefile to
+  skip creation when the venv is present; verified `make setup` returns 0
+  on consecutive runs (idempotent).
+- Re-verified after the fix: `make check` exit 0 (ruff clean, tsc clean,
+  9 backend + 3 frontend tests passed), `docker-compose.yml` parses as
+  valid YAML via PyYAML, all 12 continuity documents present and non-empty,
+  `make lock` regenerated the lockfile with zero drift, and `make test`
+  was re-run after `make setup` rewrote the environment (still green).

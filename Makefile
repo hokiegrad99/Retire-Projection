@@ -17,8 +17,8 @@ UV ?= uv
 help: ## List available targets
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-setup: ## Create the venv, install backend (editable) and frontend dependencies
-	$(UV) venv $(VENV) --python python3 --seed
+setup: ## Create the venv (if missing), install backend (editable) + frontend deps
+	@test -x $(VENV)/bin/python || $(UV) venv $(VENV) --python python3 --seed
 	$(UV) pip install --python $(PY) -e "backend[dev]"
 	cd frontend && npm install
 
