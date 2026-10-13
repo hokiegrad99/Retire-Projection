@@ -148,3 +148,44 @@ appending a new entry that references the old ID.
   renaming a stored value later requires an `ALTER TYPE … RENAME VALUE`
   migration; the PG enum type still rejects unknown values as a backstop
   (`test_unknown_enum_value_rejected_by_database`).
+
+---
+
+## D-015 — 2026-10-13 — Baseline lifecycle semantics (API)
+
+- **Decision:** exactly one baseline per household is enforced at creation
+  (`POST …/plans` with `is_baseline: true` while one exists → **409**).
+  Promotion is an explicit `PATCH /api/plans/{id} {"is_baseline": true}`
+  which demotes the current baseline in the same transaction and keeps the
+  promoted plan's `parent_plan_id` (lineage survives promotion).
+  Deleting a household or the baseline plan requires `?confirm=true`.
+- **Alternatives:** silently overwriting the previous baseline (rejected:
+  violates "never modify the baseline without confirmation"); blocking
+  promotion entirely (rejected: spec §13 requires it).
+- **Consequences:** DATA-003 adds duplication/archive on top without
+  changing these rules; the partial unique index remains the DB backstop.
+
+## D-016 — 2026-10-13 — PATCH = merged-record re-validation
+
+- **Decision:** every PATCH builds the merged record (existing row +
+  provided fields; explicit `null` clears) and validates it with the
+  entity's *Create* schema. Runtime `ValidationError` is converted to a 422
+  with FastAPI's field-level `detail` shape. Referential guards (owner
+  person must belong to the plan) also return 422; a person who still owns
+  accounts cannot be deleted (409) instead of silently cascading.
+- **Alternatives:** lenient patches (rejected: partial updates could create
+  illegal states); duplicating validation rules for PATCH (rejected: two
+  sources of truth for cross-field rules).
+- **Consequences:** one validation implementation per entity;
+  `test_expense_patch_revalidates_the_merged_record` pins the behavior.
+
+## D-017 — 2026-10-13 — Allocation replace-set uses a two-phase flush
+
+- **Decision:** replacing an account's allocations assigns an empty list,
+  flushes (old rows deleted), then assigns the new set — because the
+  unit-of-work may otherwise insert the replacement row before deleting the
+  old one, violating `uq_account_allocation_class` (observed failure, fixed
+  in `routers/accounts.py`).
+- **Consequences:** any future "replace a unique-constrained child set"
+  logic must follow the same delete→flush→insert pattern (noted in
+  `NEXT_SESSION.md` pitfalls).

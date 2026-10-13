@@ -21,7 +21,7 @@ its files — **met** (except the optional Docker verification).
 | ID | Task | Pri | Depends on | Status | Acceptance criteria |
 | --- | --- | --- | --- | --- | --- |
 | DATA-001 | Financial domain model (household, people, accounts, liabilities, income, expenses) + migrations + validation | P0 | INFRA-003 | **done** | Models migrate cleanly; validation rejects bad dates/amounts/enums; unit tests pass — verified 2026-10-13: migration `0002`, 25 schema + 11 DB tests green |
-| DATA-002 | CRUD API for all domain objects | P0 | DATA-001 | not started | Create/read/update/delete via API with OpenAPI docs; server-side validation errors are explicit |
+| DATA-002 | CRUD API for all domain objects | P0 | DATA-001 | **done** | Create/read/update/delete via API with OpenAPI docs; server-side validation errors are explicit — verified 2026-10-13: 38 endpoints, 25 API tests, live HTTP smoke |
 | DATA-003 | Plans/scenarios: protected baseline, duplicate/rename/archive, lineage | P0 | DATA-001 | not started | Mutating a scenario never alters the baseline (invariant test) |
 | CALC-001 | Deterministic year-by-year projection engine (pure Python, structured output) | P0 | DATA-001 | not started | Documented annual sequence; no circular flows; shortfalls reported, never silently funded; reference scenario reconciles |
 | UI-001 | Financial dashboard (net worth, cash flow, portfolio charts) | P1 | CALC-001 | not started | Every chart derives from calculation output; no hard-coded values |
@@ -90,4 +90,4 @@ application, reproduce its projections.
 | PERF-001 | Performance profiling (calc + simulation timing recorded) | P1 | SIM-001 | not started | Measured numbers recorded, not estimated |
 | OPS-001 | Install docs, release notes, known-limitations sign-off | P1 | all | not started | Clean-machine install from OPERATIONS.md succeeds |
 
-**Next task:** DATA-002.
+**Next task:** DATA-003.

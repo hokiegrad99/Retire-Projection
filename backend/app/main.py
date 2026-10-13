@@ -9,7 +9,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import health
+from app.routers import (
+    accounts,
+    expenses,
+    health,
+    households,
+    income_streams,
+    liabilities,
+    people,
+    plans,
+)
 from app.version import __version__
 
 
@@ -39,6 +48,13 @@ def create_app() -> FastAPI:
     )
 
     application.include_router(health.router)
+    application.include_router(households.router)
+    application.include_router(plans.router)
+    application.include_router(people.router)
+    application.include_router(accounts.router)
+    application.include_router(liabilities.router)
+    application.include_router(income_streams.router)
+    application.include_router(expenses.router)
 
     @application.get("/", include_in_schema=False)
     def root() -> dict:

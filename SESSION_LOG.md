@@ -156,3 +156,69 @@ validation rejects bad inputs, unit tests pass).
 
 **Next recommended action:** start session 3 with `make lint && make
 test`, then **DATA-002 — CRUD API** per `NEXT_SESSION.md`.
+
+---
+
+## Session 3 — 2026-10-13 — DATA-002: CRUD API over the domain model
+
+**Session objective:** expose the DATA-001 domain through a tested,
+OpenAPI-documented REST API with baseline protection and safe deletes.
+
+**Files created or modified**
+
+- Routers: `backend/app/routers/{households,plans,people,accounts,
+  liabilities,income_streams,expenses}.py` (38 endpoints); registered in
+  `app/main.py`.
+- Services: `backend/app/services/{__init__,crud}.py` — get_or_404,
+  create/patch/delete helpers, merged-record validation, ownership guards,
+  baseline promotion.
+- Schemas: `app/schemas/finance.py` +7 Read models, +7 Patch models,
+  extracted `validate_allocation_set`.
+- Infra: `app/db.py` gained `get_db`/`DbSession` (Annotated dependency).
+- Tests: `backend/tests/test_api_crud.py` (25 tests).
+- Config/docs: version 0.3.0; ARCHITECTURE §5/§10, DECISIONS D-015…D-017,
+  PROJECT_STATE, NEXT_SESSION, IMPLEMENTATION_PLAN, FEATURE_MATRIX,
+  TESTING, CHANGELOG, README updated.
+
+**Tasks completed:** DATA-002 fully (acceptance: CRUD + OpenAPI + explicit
+validation errors + baseline protection + §13 invariant test).
+
+**Commands and tests executed (actual results, including red states)**
+
+- Startup `make check` → exit 0 (46+3).
+- First wiring probe failed: my `main.py` import edit had dropped `health`
+  (NameError) — fixed. Route-count probe then showed only 5 routes,
+  which turned out to be a *counting artifact*: newer Starlette wraps
+  included routers lazily (`_IncludedRouter`); direct inspection showed
+  8 routers registered with all routes (health 1, households 7, people 5,
+  …).
+- Ruff round 1: 35×B008 (`Depends()` in parameter defaults) + 4×UP047 →
+  fixed at the cause: `Annotated[Session, Depends(get_db)]` alias
+  (`DbSession`) and PEP 695 type parameters; the sed migration then
+  exposed a real SyntaxError in two delete handlers (dependency param
+  after a defaulted query param) — reordered.
+- New API tests first run: 24/26; two genuine bugs found:
+  1. runtime PATCH `ValidationError`/`ValueError` escaped as **500**
+     (FastAPI only auto-converts body-parse errors) → service layer now
+     converts to **422** with the standard detail shape;
+  2. allocation-set replacement hit `UniqueViolation` on
+     `uq_account_allocation_class` (insert-before-delete ordering) →
+     two-phase flush fix (D-017).
+- Also fixed two E501s in the new test file (split lines).
+- **Final `make check` → exit 0:** ruff clean, tsc clean, **71 backend
+  tests** (25 api_crud + 25 schemas + 11 models + 5 app + 3 health +
+  2 migrations), **3 frontend tests**.
+- Live E2E smoke (HTTP against the running API): health 200 (v0.3.0,
+  revision 0002) → create household→baseline→person→account(allocations)
+  → 400 without confirm → 204 with confirm → lists empty again (live DB
+  left exactly as found); port 8010 released.
+
+**Outstanding problems**
+
+- No new defects after the fixes. KI-001…KI-008 unchanged; INFRA-004
+  still blocked. No pagination/optimistic locking yet (documented in
+  ARCHITECTURE §10; revisit with PERF-001/AUTH-001).
+
+**Next recommended action:** start session 4 with `make lint && make
+test`, then **DATA-003 — scenario duplication/archive/comparison** per
+`NEXT_SESSION.md`.

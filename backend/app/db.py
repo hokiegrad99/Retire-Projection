@@ -7,10 +7,12 @@ Importing this module reads the settings, so test harnesses must set
 
 import logging
 import time
+from typing import Annotated
 
+from fastapi import Depends
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import get_settings
 
@@ -32,6 +34,20 @@ def _build_engine(url: str) -> Engine:
 settings = get_settings()
 engine: Engine = _build_engine(settings.database_url)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, expire_on_commit=False)
+
+
+def get_db():
+    """FastAPI dependency: one session per request, always closed."""
+    session = SessionLocal()
+    try:
+        yield session
+    finally:
+        session.close()
+
+
+#: Annotated dependency used by every router handler (modern FastAPI style,
+#: which also keeps ruff's B008 happy: no call in a parameter default).
+DbSession = Annotated[Session, Depends(get_db)]
 
 
 def check_database() -> tuple[bool, float | None, str | None]:

@@ -1,6 +1,6 @@
 [project]
 name = "retire-projection-backend"
-version = "0.2.0"
+version = "0.3.0"
 description = "Backend API, database layer, and financial calculation engine for the Retire Projection retirement planning platform."
 requires-python = ">=3.12"
 dependencies = [

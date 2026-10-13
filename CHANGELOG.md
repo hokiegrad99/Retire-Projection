@@ -5,6 +5,25 @@ Format: newest first · dated entries · semantic-ish versions.
 
 ---
 
+## 0.3.0 — 2026-10-13 — CRUD API over the domain model (DATA-002, Phase 1)
+
+- **API:** 38 REST endpoints (households, plans, people, accounts with
+  allocations, liabilities, income streams, expenses) with OpenAPI docs;
+  201/204/404/409/422 semantics and field-level validation details.
+- **Baseline protection:** a second baseline cannot be created (409);
+  promoting a scenario via `PATCH {"is_baseline": true}` demotes the old
+  baseline and keeps lineage; deleting a household or the baseline plan
+  requires `?confirm=true`.
+- **Safety guards:** owner-person must belong to the plan (422); deleting a
+  person who still owns accounts is refused (409); PATCH re-validates the
+  merged record so partial updates cannot violate cross-field rules.
+- **Tests:** +25 API tests (71 backend total, all green), including the
+  spec §13 invariant that editing a scenario never touches the baseline;
+  live HTTP smoke verified end-to-end.
+- Bug fixes found by those tests: runtime PATCH validation now returns 422
+  (was 500); allocation-set replacement uses a two-phase flush to satisfy
+  the unique constraint.
+
 ## 0.2.0 — 2026-10-13 — Financial domain model (DATA-001, Phase 1)
 
 - **Schema:** migration `0002` adds 8 tables — `household`, `plan`

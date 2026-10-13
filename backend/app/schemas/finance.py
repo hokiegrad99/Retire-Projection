@@ -14,7 +14,7 @@ Conventions
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated
 
@@ -150,6 +150,22 @@ class AllocationCreate(_StrictModel):
     weight: Weight
 
 
+def validate_allocation_set(allocations: list[AllocationCreate]) -> None:
+    """A non-empty allocation set must use each class once and sum to exactly 1.
+
+    Shared by the draft schema (create) and the account PATCH path so the
+    rule has exactly one implementation (see DECISIONS D-011).
+    """
+    if not allocations:
+        return
+    classes = [item.asset_class for item in allocations]
+    if len(classes) != len(set(classes)):
+        raise ValueError("allocations contain a duplicate asset class")
+    total = sum((item.weight for item in allocations), start=Decimal("0"))
+    if total != Decimal("1"):
+        raise ValueError(f"allocation weights must sum to exactly 1, got {total}")
+
+
 class AccountDraft(_StrictModel):
     """An account plus its optional allocation, validated as a set."""
 
@@ -158,14 +174,7 @@ class AccountDraft(_StrictModel):
 
     @model_validator(mode="after")
     def _allocation_set_must_be_complete(self) -> AccountDraft:
-        if not self.allocations:
-            return self
-        classes = [item.asset_class for item in self.allocations]
-        if len(classes) != len(set(classes)):
-            raise ValueError("allocations contain a duplicate asset class")
-        total = sum((item.weight for item in self.allocations), start=Decimal("0"))
-        if total != Decimal("1"):
-            raise ValueError(f"allocation weights must sum to exactly 1, got {total}")
+        validate_allocation_set(self.allocations)
         return self
 
 
@@ -240,3 +249,218 @@ class ExpenseCreate(_StrictModel):
         if (self.adjustment_age is None) != (self.adjustment_percent is None):
             raise ValueError("adjustment_age and adjustment_percent must be set together")
         return self
+
+
+# ---------------------------------------------------------------------------
+# DATA-002: API read models (ORM -> JSON) and partial-update (PATCH) models.
+#
+# PATCH semantics: fields omitted keep their current value; a field sent as
+# explicit null clears it. Cross-field rules are re-validated on the *merged*
+# record by reusing the *Create schemas (see services/crud.py), so PATCH
+# cannot smuggle in states a POST would have rejected.
+# ---------------------------------------------------------------------------
+
+
+class _ReadModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+
+class HouseholdRead(_ReadModel):
+    id: int
+    name: str
+    filing_status: FilingStatus
+    state_of_residence: str | None
+    planned_relocation_state: str | None
+    planned_relocation_date: date | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PlanRead(_ReadModel):
+    id: int
+    household_id: int
+    name: str
+    is_baseline: bool
+    parent_plan_id: int | None
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class PersonRead(_ReadModel):
+    id: int
+    plan_id: int
+    role: PersonRole
+    name: str
+    date_of_birth: date
+    longevity_age: int
+    retirement_date: date | None
+    dependent_from: date | None
+    dependent_until: date | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class AllocationRead(_ReadModel):
+    id: int
+    asset_class: AssetClass
+    weight: Decimal
+
+
+class AccountRead(_ReadModel):
+    id: int
+    plan_id: int
+    owner_person_id: int
+    name: str
+    account_type: AccountType
+    tax_treatment: TaxTreatment
+    balance: Decimal
+    expected_return_rate: Decimal | None
+    fee_rate: Decimal | None
+    annual_contribution: Decimal | None
+    acquired_date: date | None
+    allocations: list[AllocationRead] = []
+    created_at: datetime
+    updated_at: datetime
+
+
+class LiabilityRead(_ReadModel):
+    id: int
+    plan_id: int
+    name: str
+    liability_type: LiabilityType
+    balance: Decimal
+    interest_rate: Decimal
+    monthly_payment: Decimal | None
+    start_date: date | None
+    payoff_date: date | None
+    notes: str | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class IncomeStreamRead(_ReadModel):
+    id: int
+    plan_id: int
+    owner_person_id: int
+    name: str
+    income_type: IncomeType
+    amount: Decimal
+    frequency: PaymentFrequency
+    start_date: date
+    end_date: date | None
+    growth_rate: Decimal | None
+    basis: MoneyBasis
+    tax_classification: TaxClassification
+    survivor_treatment: SurvivorTreatment | None
+    survivor_percent: Decimal | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ExpenseRead(_ReadModel):
+    id: int
+    plan_id: int
+    name: str
+    spending_class: ExpenseClass
+    category: ExpenseCategory
+    category_detail: str | None
+    amount: Decimal
+    frequency: PaymentFrequency
+    start_date: date
+    end_date: date | None
+    basis: MoneyBasis
+    inflation_rate: Decimal | None
+    phase: SpendingPhase
+    adjustment_age: int | None
+    adjustment_percent: Decimal | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class HouseholdPatch(_StrictModel):
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    filing_status: FilingStatus | None = None
+    state_of_residence: Annotated[str, Field(pattern=US_STATE_PATTERN)] | None = None
+    planned_relocation_state: Annotated[str, Field(pattern=US_STATE_PATTERN)] | None = None
+    planned_relocation_date: date | None = None
+
+    @field_validator("state_of_residence", "planned_relocation_state", mode="before")
+    @classmethod
+    def _normalize_state_code(cls, value: object) -> object:
+        return value.upper() if isinstance(value, str) else value
+
+
+class PlanPatch(_StrictModel):
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    notes: Annotated[str | None, Field(max_length=10_000)] = None
+    # True = promote this plan to baseline (demotes the current one); the
+    # merge-validation in PlanCreate guarantees a household never holds two.
+    is_baseline: bool | None = None
+    parent_plan_id: PersonRef | None = None
+
+
+class PersonPatch(_StrictModel):
+    name: Annotated[str, Field(min_length=1, max_length=120)] | None = None
+    role: PersonRole | None = None
+    date_of_birth: date | None = None
+    longevity_age: Annotated[int, Field(ge=40, le=120)] | None = None
+    retirement_date: date | None = None
+    dependent_from: date | None = None
+    dependent_until: date | None = None
+
+
+class AccountPatch(_StrictModel):
+    owner_person_id: PersonRef | None = None
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    account_type: AccountType | None = None
+    tax_treatment: TaxTreatment | None = None
+    balance: Money | None = None
+    expected_return_rate: Rate | None = None
+    fee_rate: FeeRate | None = None
+    annual_contribution: Money | None = None
+    acquired_date: date | None = None
+    # Replace-the-whole-set semantics; null/omitted keeps the current set.
+    allocations: list[AllocationCreate] | None = None
+
+
+class LiabilityPatch(_StrictModel):
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    liability_type: LiabilityType | None = None
+    balance: Money | None = None
+    interest_rate: Annotated[Decimal, Field(ge=0, le=1)] | None = None
+    monthly_payment: Money | None = None
+    start_date: date | None = None
+    payoff_date: date | None = None
+    notes: Annotated[str | None, Field(max_length=10_000)] = None
+
+
+class IncomeStreamPatch(_StrictModel):
+    owner_person_id: PersonRef | None = None
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    income_type: IncomeType | None = None
+    amount: Money | None = None
+    frequency: PaymentFrequency | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    growth_rate: Rate | None = None
+    basis: MoneyBasis | None = None
+    tax_classification: TaxClassification | None = None
+    survivor_treatment: SurvivorTreatment | None = None
+    survivor_percent: SurvivorFraction | None = None
+
+
+class ExpensePatch(_StrictModel):
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    spending_class: ExpenseClass | None = None
+    category: ExpenseCategory | None = None
+    category_detail: Annotated[str | None, Field(max_length=120)] = None
+    amount: Money | None = None
+    frequency: PaymentFrequency | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    basis: MoneyBasis | None = None
+    inflation_rate: Rate | None = None
+    phase: SpendingPhase | None = None
+    adjustment_age: Annotated[int | None, Field(ge=18, le=120)] = None
+    adjustment_percent: Percent | None = None

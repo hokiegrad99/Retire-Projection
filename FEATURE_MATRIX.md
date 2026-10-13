@@ -22,12 +22,12 @@ Test column: automated test names, or the manual procedure used.
 
 | Feature | Task | Pri | Status | Source | Tests | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Household / people / dependents | DATA-001 | P0 | partial | `app/models/people.py`, `app/schemas/finance.py` | `test_schemas_finance.py` (person/household), `test_models_finance.py` (cascades, baseline index) | Model + validation done; API/UI pending; goals/employment periods → DATA-012 |
-| Accounts & assets (all types), tax treatment, allocation | DATA-001 | P0 | partial | `app/models/assets.py` | `test_schemas_finance.py` (rates, allocations), `test_models_finance.py` (balance CHECK, dup class) | 24 account types modeled; withdrawal rules wait for CALC (D-012) |
-| Liabilities (mortgage…cards), amortization terms | DATA-001 | P0 | partial | `app/models/assets.py` | `test_schemas_finance.py` (payoff date order) | Amortization math in CALC-013 |
-| Income streams (salary…windfalls) | DATA-001 | P0 | partial | `app/models/flows.py` | `test_schemas_finance.py` (date/survivor/one-time rules), `test_models_finance.py` (date CHECK) | Survivor rules on stream level; plan-level beneficiaries → DATA-012 |
-| Expenses & budgets (phases, inflation by category) | DATA-001 | P0 | partial | `app/models/flows.py` | `test_schemas_finance.py` (adjustment pair, other-detail), `test_models_finance.py` (pair CHECK) | One age-adjustment per row (split rows to multi-step); relocation/renovation use category `other` + detail |
-| Multiple plans/scenarios, protected baseline | DATA-001 / DATA-003 | P0 | partial | `plan` table + partial unique index | `test_models_finance.py` (single-baseline, per-household) | Schema-level protection done; duplication/rename/compare UX = DATA-003 |
+| Household / people / dependents | DATA-001 / DATA-002 | P0 | partial | models, schemas, `routers/households.py`, `routers/people.py`, `services/crud.py` | `test_schemas_finance.py`, `test_models_finance.py`, `test_api_crud.py` | Full CRUD API live; UI pending; goals/employment periods → DATA-012 |
+| Accounts & assets (all types), tax treatment, allocation | DATA-001 / DATA-002 | P0 | partial | models, `routers/accounts.py` | `test_api_crud.py` (allocations, owner guard, 2×422) | 24 account types, allocation sets summing to 1; withdrawal rules wait for CALC (D-012) |
+| Liabilities (mortgage…cards), amortization terms | DATA-001 / DATA-002 | P0 | partial | models, `routers/liabilities.py` | `test_api_crud.py` (payoff date order via API) | Amortization math in CALC-013 |
+| Income streams (salary…windfalls) | DATA-001 / DATA-002 | P0 | partial | models, `routers/income_streams.py` | `test_api_crud.py` (survivor 422, owner-change guard) | Survivor rules on stream level; plan-level beneficiaries → DATA-012 |
+| Expenses & budgets (phases, inflation by category) | DATA-001 / DATA-002 | P0 | partial | models, `routers/expenses.py` | `test_api_crud.py` (merged-record re-validation) | One age-adjustment per row (split rows for multi-step); relocation/renovation use `other` + detail |
+| Multiple plans/scenarios, protected baseline | DATA-001 / DATA-002 / DATA-003 | P0 | partial | `plan` table, partial unique index, `routers/plans.py` | `test_api_crud.py` (409, promotion, confirm-guarded delete, §13 invariant) | Protection + promotion live; duplication/archive/compare = DATA-003 |
 | Import/export/backup/restore | DATA-004 | P1 | not started | — | — | Restore must be tested (BACKUP-001) |
 
 ## Calculation, taxes, income (spec §7–13)
