@@ -112,6 +112,7 @@
   `retirement_test` rebuilt to head for each test session.
 - **Latest build & test results (2026-10-13):** `make check` exit 0 —
   ruff clean, tsc clean, 46 backend + 3 frontend tests passed.
-- **Last known-good commit:** session 1 code: `d946100`; session 2 SHA is
-  recorded in the final line after its commit.
+- **Last known-good commit:** `78f9b2f` — session 2 (DATA-001, 26 files,
+  verified by `make check` exit 0 and a live health probe reporting
+  `migration_revision: 0002`). Previous: `d946100` (session 1).
 - **Version:** 0.2.0 (`backend/app/version.py` and `pyproject.toml`).
