@@ -1,0 +1,75 @@
+# Retire Projection — production-style deployment stack.
+#
+# STATUS: NOT YET VERIFIED (Docker unavailable on the development machine).
+# See OPERATIONS.md ("Production deployment") and INFRA-004 before use.
+#
+# Usage on the server:
+#   1. Copy the repository, edit .env (change POSTGRES_PASSWORD!)
+#   2. docker compose up -d --build
+#   3. Open http://<server>:8080 — the API itself is bound to 127.0.0.1 only.
+#
+# Security posture: database port not published, API only reachable from the
+# host, web tier reachable from the LAN. Put HTTPS (reverse proxy or tunnel)
+# in front before any remote access — see SECURITY.md.
+
+name: retire-projection
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-retire_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-retirement}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    restart: unless-stopped
+    # NOTE: the database port is intentionally NOT published to the host.
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-retire_app}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}@db:5432/${POSTGRES_DB:-retirement}
+      APP_HOST: 0.0.0.0
+      APP_PORT: "8000"
+      ENVIRONMENT: production
+      LOG_LEVEL: INFO
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:8080}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8010:8000"   # API published on this host only; host port 8010
+      # (port 8000 is occupied on the development machine — see KNOWN_ISSUES KI-001)
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=5).status==200 else 1)",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: unless-stopped
+
+  web:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  pgdata:

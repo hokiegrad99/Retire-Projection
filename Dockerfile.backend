@@ -1,0 +1,25 @@
+# Build context is the repository root:  docker build -f Dockerfile.backend .
+#
+# STATUS: written for the production server but NOT YET VERIFIED — Docker is
+# unavailable on the development machine. Verification is tracked as INFRA-004
+# (see IMPLEMENTATION_PLAN.md) and must run before any deployment.
+
+FROM python:3.12-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app/backend
+
+# Locked dependencies first for layer caching.
+COPY backend/requirements.lock.txt /tmp/requirements.lock.txt
+RUN pip install --no-cache-dir -r /tmp/requirements.lock.txt
+
+# Application code; PYTHONPATH is unnecessary because WORKDIR holds `app/`.
+COPY backend/ /app/backend/
+
+EXPOSE 8000
+
+# Run pending migrations, then serve. Binds 0.0.0.0 inside the container;
+# docker-compose publishes it on 127.0.0.1 only.
+CMD ["sh", "-c", "alembic upgrade head && exec python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"]

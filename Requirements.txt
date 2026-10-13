@@ -1,0 +1,952 @@
+MASTER PROJECT PROMPT: LOCAL-FIRST RETIREMENT PLANNING PLATFORM
+1. YOUR ROLE AND MISSION
+
+Act as my principal software architect, senior full-stack developer, financial modeling engineer, database architect, UI/UX designer, security engineer, QA engineer, and technical project manager.
+
+Build a comprehensive, locally hosted personal retirement and financial planning application that combines the breadth of capabilities found in commercial retirement planning platforms such as ProjectionLab and Boldin.
+
+The application must be original software. Use those products only as references for publicly described features, workflows, and general usability concepts. Do not copy proprietary source code, protected assets, branding, text, or exact interface designs.
+
+The objective is to build a practical, reliable, extensible application that I own and control, without a required subscription to a commercial retirement planning platform.
+
+Do not merely produce a plan, mockup, clickable prototype, or collection of disconnected screens. Build a working application with persistent data, a functional financial calculation engine, interactive scenarios, automated tests, documentation, and a repeatable deployment process.
+
+Work incrementally over multiple AI sessions if necessary. Project continuity and recovery from lost conversation history are mandatory requirements.
+
+2. PRIMARY OBJECTIVES
+
+The application must:
+
+Run locally on my computer or a home server, preferably using Docker Compose.
+Work without requiring a public cloud service or an internet connection for ordinary planning tasks.
+Store financial information locally in a database that I control.
+Support detailed retirement projections from the current year through a configurable longevity age.
+Model individuals, couples, dependents, assets, liabilities, income, expenses, investments, healthcare, taxes, Social Security, and estate objectives.
+Support saved baseline plans, independent what-if scenarios, scenario comparisons, and strategy optimization.
+Include Monte Carlo simulations and deterministic projections with transparent assumptions.
+Provide clear dashboards, charts, reports, data import, data export, and backups.
+Include advanced features comparable in purpose to premium retirement planning tools, prioritizing financial accuracy over superficial feature count.
+Preserve project state, implementation status, architectural decisions, unresolved issues, and the next actionable development task in files stored in the project repository.
+Resume safely after a crash, lost AI conversation, context-window exhaustion, or a break of several days.
+Remain usable without AI features. Any optional AI assistant must be separable from the core financial calculation engine.
+3. WORKING RULES
+
+Follow these rules throughout development.
+
+Inspect the available environment, repository, installed tools, and current files before making changes.
+If an existing project exists, understand it before replacing or restructuring anything.
+Create the project repository and persistent project-tracking documents before implementing substantial functionality.
+Establish a working end-to-end vertical slice early rather than building every frontend screen before the backend.
+Work in small, testable increments.
+Implement actual functionality behind every completed feature. Never label a placeholder, mock response, or hard-coded chart as a finished feature.
+Do not silently skip difficult requirements. Record blockers and implement a documented alternative or a clearly marked future task.
+Prefer well-maintained, established libraries over custom implementations for security-sensitive or mathematically complex functionality.
+Keep financial calculations separate from UI components and AI-generated explanations.
+Use database migrations, automated tests, reproducible dependencies, and version control.
+Never overwrite user financial data, baseline plans, backups, or uncommitted user work without authorization.
+Do not introduce mandatory paid APIs, subscriptions, telemetry, or cloud dependencies.
+Ask me a question only when an unresolved decision materially affects architecture, security, financial correctness, or a costly irreversible choice. Otherwise, choose a sensible default, document it, and continue.
+If a task cannot be completed in the current session, leave the repository in a coherent state and update the recovery documents.
+Do not claim that code was executed, a test passed, a feature was implemented, or a backup was verified unless you actually performed the operation and observed its result.
+4. MANDATORY PROJECT CONTINUITY SYSTEM
+
+This is one of the highest-priority requirements.
+
+Create and maintain the following project files from the beginning. Adapt filenames only when necessary and document any changes.
+
+Required project documents
+
+PROJECT_STATE.md
+
+The authoritative current status of the project. Include:
+
+Project purpose and scope.
+Current development phase.
+Overall completion estimate and per-module estimates.
+Last successfully completed task.
+Current task and its exact status.
+Features that are implemented and verified.
+Features implemented but not fully verified.
+Features partially implemented.
+Features not started.
+Known bugs, blockers, and technical debt.
+Current application startup status.
+Database migration status.
+Latest successful build and test results.
+Last known-good commit or repository revision.
+Most recent checkpoint date and time.
+The single most useful next task.
+
+IMPLEMENTATION_PLAN.md
+
+A phased development roadmap with task identifiers, priorities, dependencies, acceptance criteria, and completion status.
+
+Use task IDs such as:
+
+INFRA-001: Repository and development environment.
+DATA-001: Financial domain model.
+CALC-001: Deterministic projection engine.
+TAX-001: Federal tax calculation engine.
+UI-001: Financial dashboard.
+SIM-001: Monte Carlo simulation.
+OPT-001: Retirement strategy optimizer.
+QA-001: End-to-end verification.
+
+Maintain a consistent identifier for each task throughout the project.
+
+ARCHITECTURE.md
+
+Document:
+
+Technology stack and rationale.
+Application components and boundaries.
+Database schema and relationships.
+Financial calculation architecture.
+API design.
+Security model.
+Dependency and integration decisions.
+Deployment architecture.
+Data flow and calculation flow.
+Important limitations.
+
+DECISIONS.md
+
+Maintain an append-only architecture decision log. Each entry must include the date, decision, alternatives considered, rationale, and consequences.
+
+SESSION_LOG.md
+
+Append a short record for every development session:
+
+Session objective.
+Files created or modified.
+Tasks completed.
+Commands and tests executed.
+Actual test results.
+Outstanding problems.
+Next recommended action.
+
+NEXT_SESSION.md
+
+A concise, immediately actionable handoff document for the next AI session. It must contain:
+
+Instructions to reload the project state.
+Current branch or revision when available.
+Current development phase.
+Exact task to continue.
+Relevant files and functions.
+Prerequisites and commands.
+Expected result and acceptance tests.
+Known pitfalls and unresolved decisions.
+
+FEATURE_MATRIX.md
+
+A detailed checklist mapping every requested feature to:
+
+Task ID.
+Priority.
+Implementation status.
+Relevant source files.
+Automated tests.
+Manual verification steps.
+Known limitations.
+
+TESTING.md
+
+Document test commands, test data, expected outputs, test coverage, financial reference cases, integration tests, and end-to-end test procedures.
+
+CHANGELOG.md
+
+Record significant user-visible changes, schema changes, bug fixes, and releases.
+
+OPERATIONS.md
+
+Document installation, configuration, startup, shutdown, upgrades, migrations, backup, restoration, troubleshooting, and recovery.
+
+KNOWN_ISSUES.md
+
+Record confirmed defects, reproducible steps, severity, workarounds, and planned fixes.
+
+SECURITY.md
+
+Document local network exposure, authentication, encryption, secrets management, dependency updates, backup protection, and security limitations.
+
+Session startup protocol
+
+At the beginning of every new AI session:
+
+Read PROJECT_STATE.md.
+Read NEXT_SESSION.md.
+Read IMPLEMENTATIONPLAN.md and FEATUREMATRIX.md.
+Read relevant sections of ARCHITECTURE.md and DECISIONS.md.
+Inspect the repository status and recent changes.
+Run appropriate startup checks and targeted tests.
+Compare the documented status against the actual code. The repository is the source of truth when documentation and code disagree.
+Report a short reconciliation of the current state.
+Continue with the next incomplete, unblocked task. Do not restart the project or reimplement working modules unnecessarily.
+Session shutdown protocol
+
+Before ending a session, or whenever context or time is running low:
+
+Finish the current coherent unit of work.
+Run the relevant build, tests, and static checks.
+Record actual results, including failures.
+Update all affected tracking documents.
+Update NEXT_SESSION.md with one specific next task.
+Check for unfinished migrations, temporary files, secrets, and destructive changes.
+Preserve a working repository state.
+If Git is available, use a descriptive commit only after reviewing changes and ensuring that no secrets or private financial data are included.
+If the session is interrupted unexpectedly, the next session must reconstruct the status from the repository and these files.
+
+Do not rely on chat history, AI memory, or a remote agent's session history as the only record of project progress.
+
+Maintain a clear definition of done. A feature is complete only when its implementation, validation, documentation, and applicable tests are complete.
+
+5. TECHNOLOGY AND DEPLOYMENT REQUIREMENTS
+
+First inspect the available development environment and choose a maintainable stack.
+
+Preferred architecture, unless the environment provides a strong reason to change it:
+
+Frontend: React with TypeScript.
+UI: a maintained component library or accessible custom design system.
+Charts: a mature charting library.
+Backend: Python with FastAPI and Pydantic.
+Financial computation: Python modules with explicit domain models and numerical tests.
+Database: PostgreSQL for a multi-user or server deployment; SQLite may be used for a simpler single-user installation if transactional integrity, migrations, backups, and future migration are supported.
+Database access: SQLAlchemy or an equivalent well-maintained ORM.
+Schema migrations: Alembic or an equivalent migration system.
+Testing: pytest for backend calculations and integration tests; an appropriate frontend test framework and browser-based end-to-end tests.
+Packaging: Docker and Docker Compose, with a documented non-Docker development option where practical.
+API documentation: automatically generated OpenAPI documentation where supported.
+
+Use supported, stable dependency versions and lock dependencies for reproducible installation.
+
+Avoid microservices unless a concrete requirement justifies them. A modular monolith is preferred initially.
+
+Local-first operation
+Core calculations must execute locally.
+The database must remain local by default.
+No required cloud database, hosted authentication provider, external analytics service, or third-party financial account aggregator.
+No automatic upload of financial records.
+No externally hosted JavaScript, fonts, charts, or other runtime dependencies that break offline operation.
+Package frontend assets locally.
+Make external data updates optional, explicit, and documented.
+Provide configurable host binding and port settings.
+Bind to localhost by default. If LAN access is enabled, document authentication, firewall configuration, and the associated risks.
+Do not expose the database port publicly.
+Provide health checks and useful error messages.
+Support application restart without losing saved plans.
+
+Design the application so the frontend, API, calculation engine, and database have clear interfaces and can be tested independently.
+
+6. FINANCIAL DOMAIN MODEL
+
+Create a normalized, extensible data model for the following concepts.
+
+Household and people
+Household or planning group.
+Primary person and spouse or partner.
+Date of birth and configurable longevity age.
+Dependents and relevant dependency periods.
+Retirement dates and employment periods.
+Filing status, state of residence, and planned relocation.
+Financial goals and planning preferences.
+Survivor and beneficiary assumptions.
+
+Avoid collecting Social Security numbers, account passwords, or other unnecessary sensitive identifiers.
+
+Accounts and assets
+
+Support multiple accounts and assets, including:
+
+Checking and savings.
+Taxable brokerage accounts.
+Certificates of deposit and money market accounts.
+Traditional and Roth IRAs.
+Traditional and Roth 401(k), 403(b), and 457(b) accounts.
+Health savings accounts.
+529 and inherited retirement accounts where applicable.
+Cash balance and other employer retirement plans.
+Defined benefit pensions.
+Annuities.
+Primary residences and additional real estate.
+Rental property and associated income and expenses.
+Business interests and other investments.
+Vehicles and other material assets where relevant.
+
+Each account should support a name, owner, current balance, tax treatment, expected return, fees where applicable, contribution rules, withdrawal rules, and relevant dates.
+
+Support configurable asset allocation and return assumptions. Clearly distinguish nominal returns, real returns, fees, and taxes.
+
+Liabilities
+
+Support:
+
+Mortgages.
+Home equity loans and lines of credit.
+Auto loans.
+Student loans.
+Credit cards.
+Other installment debt.
+
+Model balances, interest rates, payment schedules, payoff dates, refinancing, and early payoff scenarios where applicable.
+
+Income
+
+Support:
+
+Salary and bonuses.
+Part-time and phased retirement employment.
+Employee and employer retirement contributions.
+Pensions and lump-sum pension options.
+Social Security.
+Annuities.
+Rental income.
+Business income.
+Dividends and interest.
+Other recurring income.
+One-time windfalls, inheritances, and asset sales.
+
+Each income stream should have an owner, amount, frequency, start date, end date, growth assumption, inflation treatment, tax classification, and survivor treatment where applicable.
+
+Expenses and budgets
+
+Support:
+
+Essential, discretionary, and optional spending.
+Detailed categories and customizable budgets.
+Spending phases before and after retirement.
+Healthcare and insurance.
+Housing, utilities, food, transport, travel, and hobbies.
+Education and dependent support.
+Long-term care.
+Charitable giving.
+Taxes and debt payments.
+One-time expenses and major purchases.
+Relocation and home renovation.
+Inflation assumptions by category.
+Spending reductions or increases at specified ages or life events.
+
+Distinguish nominal spending from today's-dollar spending. Avoid double-counting expenses that are already represented elsewhere in the cash-flow model.
+
+Data integrity
+
+Use stable IDs, foreign keys, database constraints, and explicit relationships.
+
+Provide validation for dates, amounts, account types, missing assumptions, and inconsistent records.
+
+Support multiple independent plans and scenarios per household. Protect baseline data from accidental modification.
+
+7. DETERMINISTIC FINANCIAL PROJECTION ENGINE
+
+This is the central component of the application.
+
+Implement a transparent, deterministic projection engine that calculates results year by year, with the option for monthly calculations where necessary for timing-sensitive events.
+
+The engine must model:
+
+Current balances and initial net worth.
+Employment income and retirement transitions.
+Savings and employer contributions.
+Investment growth and fees.
+Contributions, withdrawals, and account transfers.
+Inflation-adjusted income and expenses.
+Taxes and tax withholding assumptions.
+Social Security and pension income.
+Debt amortization.
+Healthcare and Medicare costs.
+Required minimum distributions.
+Roth conversions.
+Real estate appreciation, mortgage amortization, and sale events.
+Major one-time cash flows.
+Asset depletion and shortfall events.
+Estate value at death or the selected longevity horizon.
+Calculation requirements
+Use a consistent annual calculation sequence and document it.
+Define the order in which income, investment returns, contributions, taxes, withdrawals, and expenses occur.
+Avoid circular calculations and double counting.
+Handle partial retirement years and changes in household status.
+Define how negative cash flow is funded.
+Distinguish taxable income from cash income and account withdrawals.
+Keep account-specific tax treatment explicit.
+Track balances by account and tax category.
+Record unmet spending needs and insolvency years.
+Report assumptions and calculation warnings alongside results.
+
+Use decimal arithmetic for currency calculations where appropriate. Document rounding rules. Use numerically appropriate methods for probabilities and statistical simulations.
+
+Do not silently treat an unfunded expense as paid or allow a depleted account to acquire a negative balance without an explicit borrowing rule.
+
+The calculation engine must return structured, machine-readable outputs, including annual income, expenses, taxes, contributions, withdrawals, account balances, net worth, estate value, and shortfall information.
+
+8. TAX MODELING
+
+Build a modular U.S. tax engine with tax rules separated from the projection engine.
+
+Federal taxes
+
+Support the relevant rules for:
+
+Ordinary income tax brackets.
+Filing statuses.
+Standard and itemized deduction assumptions where implemented.
+Capital gains and qualified dividend taxation.
+Taxable Social Security benefits.
+Retirement account distributions.
+Roth conversions.
+Required minimum distributions.
+Payroll taxes where relevant.
+Investment income.
+Applicable additional taxes and thresholds where supported.
+State taxes
+
+Design a state-specific tax-rule interface so state modules can be implemented and tested independently.
+
+Prioritize the user's configured state first, then expand to other states and jurisdictions. Do not claim comprehensive 50-state support until the applicable tax rules have been implemented and tested.
+
+Model relocation between states when feasible, including the effective date of the move.
+
+Tax rule maintenance
+Store effective dates and tax-year versions for tax brackets, deductions, contribution limits, and other thresholds.
+Separate enacted rules from user-defined planning assumptions.
+Clearly identify rules that are incomplete, estimated, or outdated.
+Include tests against published IRS and state tax reference examples.
+Make assumptions inspectable in the UI.
+Avoid silently extrapolating old tax rules into future years without a documented assumption.
+
+Do not claim to provide tax filing software or authoritative tax advice.
+
+9. SOCIAL SECURITY, PENSIONS, AND RETIREMENT INCOME
+
+Implement a Social Security planning module that supports:
+
+Configurable benefit estimates or manually entered benefit amounts.
+Claiming-age comparisons.
+Early claiming reductions and delayed retirement credits.
+Cost-of-living adjustments.
+Spousal and survivor benefits in supported cases.
+Changes in household status and benefit continuation.
+Comparison of claiming strategies across the household.
+Sensitivity to future benefit adjustments.
+
+Clearly distinguish official benefit estimates from simplified estimates and user-entered assumptions.
+
+Support pensions with start dates, inflation adjustments, survivor elections, lump-sum alternatives, and configurable payment structures.
+
+Support annuity income with start dates, cost-of-living adjustments, survivor benefits, and explicit purchase costs.
+
+10. HEALTHCARE AND LONG-TERM CARE
+
+Support:
+
+Employer-sponsored coverage during working years.
+Pre-Medicare insurance costs.
+ACA marketplace planning assumptions where feasible.
+Medicare eligibility and configurable premiums.
+Medicare Part B and Part D costs.
+Supplemental and Medicare Advantage cost assumptions.
+Income-related Medicare premium surcharges, including IRMAA where supported.
+Healthcare inflation distinct from general inflation.
+Long-term care costs and configurable care periods.
+Survivor and household coverage changes.
+
+Use effective-dated assumptions and clearly identify simplified insurance estimates.
+
+11. WITHDRAWAL STRATEGIES AND REQUIRED DISTRIBUTIONS
+
+Implement configurable withdrawal strategies, including:
+
+Spending-needs-based withdrawals.
+Fixed-percentage withdrawals.
+Maximum sustainable spending subject to configurable planning constraints.
+User-defined account withdrawal order.
+A conventional tax-category-aware withdrawal order.
+Cash reserve and emergency reserve rules.
+Required minimum distributions.
+Tax-aware withdrawals where supported.
+Withdrawal restrictions and penalties where applicable.
+
+Ensure the engine handles insufficient funds, account-specific restrictions, and required distributions that exceed spending needs.
+
+Show withdrawals by account and tax category. Report the effects on lifetime taxes, portfolio longevity, spending, and estate value.
+
+Document the difference between a heuristic withdrawal rule and a mathematically optimized strategy.
+
+12. MONTE CARLO SIMULATION AND STRESS TESTING
+
+Implement a Monte Carlo engine that evaluates a large number of retirement paths using configurable assumptions.
+
+Requirements:
+
+Configurable simulation count.
+Reproducible random seeds.
+Documented return and inflation distributions.
+Support for correlated asset returns if the selected model supports them.
+Sequence-of-returns risk analysis.
+Variable inflation scenarios.
+Adjustable longevity and spending assumptions.
+Historical or deterministic stress scenarios.
+Market crashes near retirement.
+Prolonged low-return periods.
+Higher healthcare costs.
+Longevity and survivor scenarios.
+Adverse changes in future income or benefits.
+
+Report:
+
+Probability of fully funding the plan under a precisely defined success criterion.
+Portfolio depletion probability and timing.
+Percentile outcomes.
+Median and downside outcomes.
+Ending portfolio and estate distributions.
+Real versus nominal results.
+Sensitivity to key assumptions.
+
+Never present a Monte Carlo success percentage without defining what success means, what assumptions were used, and how many simulations were run.
+
+Distinguish historical backtesting from forward-looking simulation. Do not describe simulated outcomes as guarantees.
+
+Test deterministic reproducibility, numerical stability, and known statistical properties.
+
+13. SCENARIO MANAGEMENT
+
+Allow users to create, duplicate, rename, archive, and compare independent scenarios.
+
+Examples include:
+
+Retire earlier or later.
+Change savings rates.
+Reduce spending.
+Buy or sell a home.
+Relocate.
+Change investment allocation.
+Change claiming ages.
+Add pension or annuity income.
+Modify healthcare assumptions.
+Model inheritances or other windfalls.
+Change longevity assumptions.
+Adjust inflation and investment returns.
+Compare alternative withdrawal strategies.
+Explore Roth conversions.
+Model survivor scenarios.
+
+Provide:
+
+A protected baseline scenario.
+Scenario-specific changes and overrides.
+Clear scenario lineage and creation timestamps.
+Side-by-side comparisons.
+A way to identify which assumptions differ.
+The ability to promote a scenario to the new baseline only after explicit user confirmation.
+
+Never mutate the baseline when experimenting with an alternative.
+
+14. ADVANCED STRATEGY OPTIMIZATION
+
+After the core projection and tax engines are validated, implement an optimization framework.
+
+Roth conversion optimizer
+
+Support configurable annual conversion schedules and evaluate strategies such as:
+
+Filling selected federal tax brackets.
+Respecting configurable IRMAA thresholds.
+Minimizing projected lifetime tax liability.
+Maximizing projected after-tax estate value.
+Comparing conversion costs today against future taxes.
+Accounting for conversion-related effects on Medicare premiums and other modeled thresholds.
+
+Use the actual projection and tax engines to evaluate candidate schedules. Do not use an AI language model to invent financial results.
+
+Social Security optimizer
+
+Compare available claiming ages and household strategies against explicit objectives such as lifetime benefits, household cash flow, portfolio longevity, and survivor outcomes.
+
+Retirement date optimizer
+
+Search for the earliest feasible retirement date under configurable spending, longevity, and risk criteria.
+
+Spending optimizer
+
+Estimate sustainable spending levels under explicit deterministic or probabilistic constraints.
+
+Withdrawal and asset-location optimization
+
+Compare tax-aware withdrawal sequences and other implementable strategies using the same projection assumptions.
+
+Optimization standards
+Specify the objective function and constraints.
+Identify the metric being minimized or maximized.
+Display assumptions, trade-offs, and limitations.
+Compare the selected result with the baseline.
+Preserve the original plan.
+Validate optimized results with independent projection runs.
+Avoid claiming a global optimum unless the algorithm establishes one.
+Use sensitivity analysis where practical.
+15. REAL ESTATE, DEBT, AND ESTATE PLANNING
+
+Support:
+
+Primary residence valuation and appreciation.
+Mortgages and amortization.
+Home purchases and sales.
+Downsizing and relocation.
+Rental income, expenses, and sale proceeds.
+Home equity strategies where modeled.
+Property transaction costs and configurable tax assumptions.
+Debt payoff and refinancing comparisons.
+Survivor household expenses.
+Inheritance and legacy goals.
+Beneficiary and estate assumptions.
+Estimated estate taxes when relevant and implemented.
+After-tax legacy value with clearly documented assumptions.
+
+Do not treat home equity as spendable cash unless a sale, borrowing, or other explicit transaction makes the funds available.
+
+16. DASHBOARD AND USER EXPERIENCE
+
+Create a polished, responsive, accessible financial planning interface.
+
+Include:
+
+Main dashboard
+Current net worth.
+Total assets and liabilities.
+Retirement readiness indicators.
+Projected portfolio at retirement and at longevity.
+Annual cash flow.
+Projected taxes.
+Retirement income versus spending.
+Shortfall warnings.
+Monte Carlo outcome summaries.
+Upcoming financial milestones.
+Navigation and data entry
+
+Create dedicated modules for:
+
+Household profile.
+Accounts and investments.
+Income.
+Expenses and budgets.
+Debts.
+Social Security.
+Pensions and annuities.
+Healthcare.
+Tax assumptions.
+Real estate.
+Scenarios.
+Simulations.
+Optimizers.
+Reports.
+Settings and data management.
+
+Use guided onboarding, sensible defaults, field validation, contextual help, and inline explanations.
+
+Charts and reports
+
+Provide:
+
+Net worth over time.
+Portfolio balances by account type.
+Income and expense projections.
+Annual cash flow.
+Tax liability by year.
+Withdrawal sources.
+Asset allocation.
+Scenario comparisons.
+Monte Carlo percentile bands.
+Portfolio depletion and shortfall timelines.
+Estimated legacy value.
+
+Use interactive tooltips, accessible labels, clear legends, and consistent monetary formatting.
+
+Every chart must derive from actual calculation results. Avoid hard-coded sample values in production views.
+
+Include a sample household that is clearly marked as demonstration data, not the user's real finances.
+
+17. IMPORT, EXPORT, BACKUP, AND RESTORE
+
+Implement:
+
+CSV import for accounts, transactions, income, and expenses where appropriate.
+CSV export of financial records and projection results.
+JSON export and import of complete plans and scenarios.
+Schema-versioned backup files.
+Database backup and restoration procedures.
+Validation and preview before importing.
+Duplicate detection where applicable.
+Clear import error reporting.
+Export of key reports in a printable format; PDF export may be implemented using a suitable local library.
+Automatic local backups with configurable retention.
+A user-triggered backup before major upgrades or migrations.
+
+Test backup restoration, not just backup creation.
+
+Backups must be stored separately from the live database where practical. Warn users that unencrypted backups may contain sensitive financial information.
+
+18. SECURITY AND PRIVACY
+
+Treat financial data as highly sensitive.
+
+Requirements:
+
+Local-only operation by default.
+Authentication if access extends beyond a single trusted local user or localhost.
+Secure session handling and password hashing if authentication is implemented.
+Protection against common web vulnerabilities.
+Input validation on the frontend and backend.
+Parameterized database access.
+CSRF protection where applicable.
+Secure secret and configuration handling.
+No credentials or private financial records in logs.
+No telemetry or data sharing by default.
+No unexpected outbound network connections.
+Dependency vulnerability checks.
+Least-privilege filesystem and database access.
+Clear guidance on HTTPS when accessing the app over a network.
+A documented threat model and limitations.
+
+If optional AI integration is added, make it opt-in. Explain what information would leave the machine and which provider receives it. Provide a local-model integration option where feasible.
+
+The core application must not require sending financial data to an external AI service.
+
+19. OPTIONAL PLAN-AWARE AI ASSISTANT
+
+Only after the deterministic financial engine and its tests are reliable, consider a locally hosted or explicitly optional AI assistant.
+
+It may answer questions such as:
+
+What changes if I retire two years earlier?
+Which assumptions are most important to my plan?
+How do two scenarios differ?
+What are the largest projected expense categories?
+What could cause my portfolio to run out?
+Which input data is missing or inconsistent?
+What trade-offs arise from different Social Security claiming ages?
+
+The assistant must call application tools or APIs to retrieve calculated results and run real scenarios.
+
+It must not independently invent account balances, tax liabilities, probabilities, or projection outcomes.
+
+For every quantitative answer, identify the scenario, assumptions, calculation results, and relevant years. Link explanations to actual application results where practical.
+
+Clearly distinguish factual calculations from interpretation, estimates, and suggestions. Require confirmation before changing financial records or applying a new strategy.
+
+20. TESTING AND FINANCIAL CORRECTNESS
+
+Build tests alongside each module, not at the end.
+
+Unit tests
+
+Test individual financial functions, validation rules, tax calculations, account rules, inflation adjustments, amortization, and withdrawal calculations.
+
+Integration tests
+
+Test the interaction between accounts, income, expenses, taxes, Social Security, withdrawals, and the projection engine.
+
+Regression tests
+
+Maintain version-controlled reference scenarios with expected outputs and explicit tolerances. When a calculation changes, explain and review the expected differences.
+
+Property and invariant tests
+
+Test properties such as:
+
+A zero-return, zero-contribution account remains unchanged unless a transaction occurs.
+Contributions and withdrawals reconcile to ending balances.
+Assets minus liabilities equal net worth.
+A scenario does not modify the baseline.
+Identical inputs and random seeds reproduce simulation results.
+Depleted accounts do not silently fund additional spending.
+Taxes are not double-counted.
+Cash flows reconcile within documented rounding tolerances.
+Reference validation
+
+Use authoritative, applicable tax and benefit references. Record the source, effective tax year, reference case, expected result, and actual result.
+
+Do not mark a tax or benefits module fully validated solely because it produces plausible-looking numbers.
+
+Completion criteria
+
+A feature is complete only when:
+
+Implementation is present.
+The feature is integrated into the application.
+Relevant automated tests pass.
+Error handling is implemented.
+Documentation is updated.
+Manual verification instructions exist.
+Known limitations are documented.
+21. DEVELOPMENT PHASES AND PRIORITIES
+
+Implement the following phases in order unless a documented dependency justifies a change.
+
+Phase 0: Discovery and project foundation
+Inspect environment and available tools.
+Establish Git and repository structure.
+Create all required tracking documents.
+Select and document the stack.
+Define the financial domain model.
+Establish reproducible development and testing commands.
+Create a basic startup and health-check workflow.
+
+Exit criteria: the project can be reconstructed, started, tested, and resumed from its files.
+
+Phase 1: Minimum viable planning application
+Household setup.
+Accounts, assets, liabilities, income, and expenses.
+Database persistence and migrations.
+Basic financial dashboard.
+Deterministic year-by-year projection.
+Basic retirement date, inflation, return, and longevity assumptions.
+Net worth, cash flow, and portfolio charts.
+Scenario duplication and comparison.
+Basic import, export, and backup.
+
+Exit criteria: a user can enter a realistic household, save it, restart the application, and reproduce its projections.
+
+Phase 2: Retirement income modeling
+Social Security.
+Pensions and annuities.
+Retirement contributions.
+Account-specific withdrawals.
+Required minimum distributions.
+Healthcare and Medicare assumptions.
+Debt amortization.
+Real estate transactions.
+
+Exit criteria: major household income and expense streams are represented in the annual projection and tested.
+
+Phase 3: Tax engine
+Federal income taxes.
+Retirement distributions and Roth conversions.
+Taxable investment income.
+State tax framework and prioritized state implementation.
+Effective-dated tax rules.
+Reference tax tests.
+
+Exit criteria: supported tax calculations reconcile with documented reference cases.
+
+Phase 4: Risk and simulations
+Monte Carlo simulations.
+Sequence-of-returns stress tests.
+Percentile projections.
+Downside risk metrics.
+Sensitivity analysis.
+Historical backtesting where supported.
+
+Exit criteria: reproducible simulations, validated metrics, and clear assumptions.
+
+Phase 5: Advanced optimizers
+Roth conversion strategies.
+Social Security claiming comparisons.
+Retirement date optimization.
+Sustainable spending.
+Withdrawal optimization.
+Estate and legacy comparisons.
+
+Exit criteria: optimization outputs are calculated by the real financial engine, reproducible, and compared against baseline scenarios.
+
+Phase 6: Advanced UX and reporting
+Complete guided onboarding.
+Advanced charts.
+Comprehensive reports.
+Improved accessibility.
+Data import/export enhancements.
+Optional plan-aware AI assistant.
+Additional tax jurisdictions and account types.
+
+Exit criteria: supported functionality is discoverable, documented, and tested.
+
+Phase 7: Hardening and release
+Full regression suite.
+Security review.
+Backup restoration test.
+Upgrade and migration test.
+Performance profiling.
+Installation documentation.
+User acceptance testing.
+Release notes and known limitations.
+
+Exit criteria: a reproducible, documented release with no unresolved critical defects.
+
+Do not attempt to implement every advanced feature before Phase 1 is working.
+
+22. PERFORMANCE AND MAINTAINABILITY
+Keep calculation logic deterministic and independently testable.
+Use vectorization or parallel execution for simulations only where it improves measured performance and preserves correctness.
+Avoid unnecessary recalculation of unchanged scenarios.
+Cache derived results only when invalidation is reliable.
+Record calculation duration and simulation count in development diagnostics.
+Use database indexes and pagination where appropriate.
+Keep functions focused and modules cohesive.
+Add comments explaining financial rules, numerical methods, and non-obvious decisions.
+Document all simplifications that can materially change retirement outcomes.
+
+Do not optimize prematurely. Establish correct baseline behavior and performance measurements first.
+
+23. ACCEPTANCE TESTS FOR THE COMPLETE APPLICATION
+
+Before calling the application ready for personal use, verify that:
+
+I can install it using the documented procedure.
+I can start and stop it locally.
+I can create a household and enter financial data.
+My data persists after restarting the application.
+I can view a year-by-year retirement projection.
+Projected assets, liabilities, income, expenses, and cash flows reconcile.
+I can save, duplicate, and compare scenarios without changing the baseline accidentally.
+Supported tax calculations pass documented reference tests.
+I can run reproducible Monte Carlo simulations.
+I can inspect assumptions behind the reported probability of success.
+Supported retirement income, healthcare, and withdrawal rules operate as documented.
+I can export and restore my plan.
+I can back up the database and successfully restore it.
+The application works without an external service for its core features.
+No critical security issue or known data-loss defect remains unresolved.
+The project status documents accurately reflect the actual code.
+Another AI session can resume the project using the repository documentation alone.
+
+If a criterion is not met, report it as incomplete rather than claiming overall completion.
+
+24. FIRST ACTIONS
+
+Begin with Phase 0.
+
+Perform the following steps in order:
+
+Inspect the environment, existing repository, and available development tools.
+Identify any environment limitations that could affect implementation.
+Create the project directory and Git repository if needed.
+Create the required project continuity documents.
+Draft the initial architecture and feature matrix.
+Establish the smallest runnable application with a database connection and health check.
+Add automated tests and a reproducible startup workflow.
+Run the application and tests where the environment permits.
+Update the project status with the actual results.
+Provide a concise summary of the architecture, files created, commands used, tests performed, and the next task.
+
+Do not stop after presenting the plan. Continue implementing Phase 0 in the available environment.
+
+If tool permissions, missing software, or the current environment prevent an operation, document the precise limitation and proceed with the work that remains possible.
+
+25. FINAL OPERATING INSTRUCTION
+
+Treat this as a long-running engineering project, not a one-session coding exercise.
+
+At every point, prioritize:
+
+Preservation of user data and project continuity.
+Financial correctness and transparent assumptions.
+A working, testable application.
+Privacy and local control.
+Incremental, documented delivery.
+Broad feature coverage.
+Visual polish.
+
+Maintain PROJECTSTATE.md, IMPLEMENTATIONPLAN.md, FEATUREMATRIX.md, SESSIONLOG.md, and NEXT_SESSION.md throughout the project.
+
+When I start a new session, use the saved files to resume exactly where development stopped. Verify the repository state before proceeding, avoid repeating completed work, and choose the next incomplete task with the highest value and fewest unresolved dependencies.
+
+Begin now.
+
