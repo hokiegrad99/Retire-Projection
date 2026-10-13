@@ -95,5 +95,7 @@ D-002), reports, and the optional AI assistant.
   (live) and recreated per test session in `retirement_test`.
 - **Latest build & test results (2026-10-13):** `make lint` = 0 errors;
   `make test` = 9 backend + 3 frontend passed; `vite build` succeeded.
-- **Last known-good commit:** recorded at the bottom after each commit.
-  Current working tree = session 1 result (see `SESSION_LOG.md`).
+- **Last known-good commit:** `b5f1744` — Phase 0 baseline (52 files,
+  2026-10-13). The follow-up commit that records this line touches docs
+  only, so code identity with `b5f1744` is preserved.
+- **Branch:** `main` (single root commit + docs follow-up).
