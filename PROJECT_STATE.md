@@ -109,7 +109,7 @@ D-002), reports, and the optional AI assistant.
   (live) and recreated per test session in `retirement_test`.
 - **Latest build & test results (2026-10-13):** `make lint` = 0 errors;
   `make test` = 9 backend + 3 frontend passed; `vite build` succeeded.
-- **Last known-good commit:** `b5f1744` — Phase 0 baseline (52 files,
-  2026-10-13). The follow-up commit that records this line touches docs
-  only, so code identity with `b5f1744` is preserved.
+- **Last known-good commit:** `d946100` — session 1 final state (supersedes
+  baseline `b5f1744`); all checks were re-run after the `make setup` fix in
+  that commit: `make check` exit 0, tests green after environment reinstall.
 - **Branch:** `main` (single root commit + docs follow-up).
