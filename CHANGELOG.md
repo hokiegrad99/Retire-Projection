@@ -5,6 +5,26 @@ Format: newest first · dated entries · semantic-ish versions.
 
 ---
 
+## 0.4.0 — 2026-10-13 — Scenario management: duplicate, archive, compare (DATA-003, Phase 1)
+
+- **Duplication:** `POST /api/plans/{id}/duplicate` deep-copies every
+  owned row (people, accounts with allocation sets, liabilities, income
+  streams, expenses) with owner remapping and exact Decimal/date values;
+  the copy records lineage (`parent_plan_id`) and can request a name or
+  seed a household's first baseline (409 if one exists).
+- **Archive:** migration `0003` adds `plan.archived_at`; `PATCH
+  {"archived": true/false}` archives/restores. Archived plans are hidden
+  from the household's plan listing unless `?include_archived=true`, stay
+  individually readable, and can neither *be* the baseline nor *become*
+  it (409 both ways — D-018).
+- **Comparison:** `GET /api/plans/{id}/compare/{other}` reports
+  field-level differences per entity plus rows present on only one side
+  (matched by name; values normalized to exact JSON scalars — D-019);
+  plans of different households → 422.
+- **Tests:** +11 scenario tests (82 backend total, all green), including
+  the duplicate-then-edit §13 invariant; live HTTP smoke against v0.4.0
+  with health reporting `migration_revision: 0003`.
+
 ## 0.3.0 — 2026-10-13 — CRUD API over the domain model (DATA-002, Phase 1)
 
 - **API:** 35 REST endpoints (households, plans, people, accounts with

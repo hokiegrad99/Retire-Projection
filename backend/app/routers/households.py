@@ -59,11 +59,19 @@ def delete_household(
 
 
 @router.get("/{household_id}/plans", response_model=list[PlanRead])
-def list_plans(household_id: int, db: DbSession) -> list[Plan]:
+def list_plans(
+    household_id: int,
+    db: DbSession,
+    include_archived: bool = Query(
+        False, description="Include archived scenarios in the listing."
+    ),
+) -> list[Plan]:
     get_or_404(db, Household, household_id, "household")
-    return list(
-        db.scalars(select(Plan).where(Plan.household_id == household_id).order_by(Plan.id))
-    )
+    statement = select(Plan).where(Plan.household_id == household_id)
+    if not include_archived:
+        # Archived plans stay readable individually but hide by default.
+        statement = statement.where(Plan.archived_at.is_(None))
+    return list(db.scalars(statement.order_by(Plan.id)))
 
 
 @router.post("/{household_id}/plans", response_model=PlanRead, status_code=201)

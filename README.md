@@ -5,10 +5,11 @@ year-by-year deterministic projections, tax-aware planning, scenario
 comparison, Monte Carlo simulation, and strategy optimizers. You own the data;
 everything runs on your machine with no cloud services and no subscription.
 
-> **Status: Phase 1 in progress.** DATA-001 (8-table domain model,
-> migration `0002`) and **DATA-002 (CRUD REST API, OpenAPI-documented)**
-> shipped — 71 backend + 3 frontend tests green. Next: DATA-003 scenario
-> management. See `IMPLEMENTATION_PLAN.md` for the roadmap.
+> **Status: Phase 1 in progress.** DATA-001 (8-table domain model),
+> **DATA-002 (CRUD REST API)** and **DATA-003 (scenario duplicate /
+> archive / compare, migration `0003`)** shipped — 82 backend + 3
+> frontend tests green. Next: CALC-001 projection engine. See
+> `IMPLEMENTATION_PLAN.md` for the roadmap.
 
 ## Documentation index
 

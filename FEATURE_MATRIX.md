@@ -11,7 +11,7 @@ Test column: automated test names, or the manual procedure used.
 | Local database under user control | D-001, INFRA-003 | P0 | done | `app/db.py`, Postgres 16 | `test_health_requires_database` | Role/db creation documented in OPERATIONS.md |
 | Docker Compose packaging | INFRA-004 | P1 | **blocked** | `docker-compose.yml`, Dockerfiles | — | Written, never built (no Docker here) |
 | Non-Docker dev option | INFRA-001 | P1 | done | Makefile + docs | `make lint`, `make test` | Primary path on this machine |
-| Persistent data + migrations | INFRA-003 | P0 | partial | Alembic `0001` | `test_baseline_migration_applies` | No financial tables yet (DATA-001) |
+| Persistent data + migrations | INFRA-003, DATA-001/003 | P0 | done | Alembic `0001`…`0003`, `alembic/versions/` | `test_migrations.py` (head applies, downgrade→upgrade round trip) | 9 tables incl. `plan.archived_at`; live DB at `0003`; no user data entered |
 | Health check + useful errors | INFRA-003 | P0 | done | `app/routers/health.py` | `test_health_*` (3) | 200/503 contract, D-009 |
 | Auto-generated API docs | INFRA-003 | P2 | done | FastAPI `/api/docs` | `test_openapi_document_is_served`, `test_swagger_docs_are_served` | Served locally |
 | Continuity documents (12) | INFRA-002 | P0 | done | repo root | Manual (protocol in PROJECT_STATE) | Maintained via session protocol |
@@ -27,7 +27,7 @@ Test column: automated test names, or the manual procedure used.
 | Liabilities (mortgage…cards), amortization terms | DATA-001 / DATA-002 | P0 | partial | models, `routers/liabilities.py` | `test_api_crud.py` (payoff date order via API) | Amortization math in CALC-013 |
 | Income streams (salary…windfalls) | DATA-001 / DATA-002 | P0 | partial | models, `routers/income_streams.py` | `test_api_crud.py` (survivor 422, owner-change guard) | Survivor rules on stream level; plan-level beneficiaries → DATA-012 |
 | Expenses & budgets (phases, inflation by category) | DATA-001 / DATA-002 | P0 | partial | models, `routers/expenses.py` | `test_api_crud.py` (merged-record re-validation) | One age-adjustment per row (split rows for multi-step); relocation/renovation use `other` + detail |
-| Multiple plans/scenarios, protected baseline | DATA-001 / DATA-002 / DATA-003 | P0 | partial | `plan` table, partial unique index, `routers/plans.py` | `test_api_crud.py` (409, promotion, confirm-guarded delete, §13 invariant) | Protection + promotion live; duplication/archive/compare = DATA-003 |
+| Multiple plans/scenarios, protected baseline | DATA-001 / DATA-002 / DATA-003 | P0 | done | `plan` table, partial unique index, `routers/plans.py`, `services/scenarios.py` | `test_api_crud.py` (409, promotion, confirm-guarded delete, §13 invariant), `test_api_scenarios.py` (duplicate/archive/compare) | Protection, promotion, duplication+lineage, archive (D-018), comparison (D-019) live; UI (UI-010) still pending |
 | Import/export/backup/restore | DATA-004 | P1 | not started | — | — | Restore must be tested (BACKUP-001) |
 
 ## Calculation, taxes, income (spec §7–13)
@@ -50,7 +50,7 @@ Test column: automated test names, or the manual procedure used.
 | --- | --- | --- | --- | --- |
 | Monte Carlo (seeded, reproducible) | SIM-001 | P0 | not started | Success criterion always displayed |
 | Stress tests / sensitivity / backtest | SIM-002/003 | P1 | not started | |
-| Scenario comparison UI | DATA-003, UI-010 | P0 | not started | |
+| Scenario comparison UI | UI-010 | P0 | not started | Backend diff endpoint live since v0.4.0 (`GET /api/plans/{id}/compare/{other}`, D-019); UI pending |
 | Optimizers (Roth, SS, date, spending) | OPT-001…005 | P1 | not started | Engine-computed only |
 | Dashboard & charts (all from real results) | UI-001 | P1 | partial | Health/status card only; no financial charts yet |
 | Data-entry modules | UI-002 | P1 | not started | |

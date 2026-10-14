@@ -97,24 +97,31 @@ enforced at the schema/service layer and tested there.
 - Unfunded expenses are recorded as shortfalls; accounts never go silently
   negative; borrowing must be an explicit rule.
 
-## 5. API design (live since DATA-002, v0.3.0)
+## 5. API design (live since DATA-002, v0.3.0; scenarios since v0.4.0)
 
 - Prefix `/api`; JSON; OpenAPI at `/api/openapi.json`, interactive docs at
   `/api/docs` (served by the same app — no external resources).
 - **Surface:** CRUD for `households`, `plans`, `people`, `accounts`
   (with allocation sets), `liabilities`, `income-streams`, `expenses` —
   nested collection routes (`POST/GET /api/plans/{id}/people`, …) plus
-  item routes (`GET/PATCH/DELETE /api/people/{id}`, …).
+  item routes (`GET/PATCH/DELETE /api/people/{id}`, …) — plus scenario
+  management: `POST /api/plans/{id}/duplicate` (deep copy with lineage),
+  `GET /api/plans/{id}/compare/{other}` (field-level diff), and archive
+  via `PATCH {"archived": true}` with `?include_archived=true` on the
+  household's plan listing (D-018/D-019).
 - **Status codes:** 201 create, 204 delete, 404 unknown id, 409 logical
-  conflicts (second baseline; deleting a person who still owns accounts),
-  422 validation (body, merged PATCH state, or referential guards) with
-  FastAPI's field-level `detail` shape.
+  conflicts (second baseline; deleting a person who still owns accounts;
+  archiving the baseline; promoting an archived plan; duplicating to a
+  second baseline), 422 validation (body, merged PATCH state, referential
+  guards, cross-household comparison) with FastAPI's field-level
+  `detail` shape.
 - **PATCH semantics:** omitted fields keep their value; explicit `null`
   clears it; the *merged* record is re-validated by the entity's Create
   schema, so patches cannot produce states POST would reject (D-016).
 - **Safety:** deleting a household or the baseline plan requires
   `?confirm=true`; baseline promotion is `PATCH {"is_baseline": true}`
-  (demotes the current baseline, keeps lineage — D-015).
+  (demotes the current baseline, keeps lineage — D-015); the baseline
+  and archives are mutually exclusive states (D-018).
 - **Layers:** routers (thin, HTTP) → `app/services/*` (persistence rules,
   API-level errors) → SQLAlchemy models. The calculation engine (Phase
   1 CALC-001+) will sit beside the services and never import FastAPI.

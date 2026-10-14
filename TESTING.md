@@ -27,11 +27,12 @@ cd frontend && npx vitest run
   engine always binds to the test database during tests.
 - The `db_session` fixture truncates all eight domain tables after every
   test, so tests cannot leak rows into each other; API tests get the same
-  isolation from an autouse fixture in `test_api_crud.py`.
+  isolation from autouse fixtures in `test_api_crud.py` and
+  `test_api_scenarios.py`.
 - Migration assertions compare against the `expected_head` fixture (never
   a hardcoded revision id), so adding a revision never breaks unrelated
   tests.
-- The schema exists (migration `0002`) but **no user financial data** has
+- The schema exists (migration `0003`) but **no user financial data** has
   been entered — only synthetic test rows, which are destroyed per test.
 
 ## 3. Current suites (observed results, 2026-10-13, `make check` exit 0)
@@ -39,13 +40,14 @@ cd frontend && npx vitest run
 | Suite | Count | Result | What it covers |
 | --- | --- | --- | --- |
 | `tests/test_api_crud.py` | 25 | pass | DATA-002 API: CRUD happy paths, 422/404/409 semantics, confirm-guarded deletes, baseline promotion with lineage, merged-record PATCH validation, spec §13 scenario-isolation invariant, OpenAPI surface |
+| `tests/test_api_scenarios.py` | 11 | pass | DATA-003 scenario management: duplicate deep-copy invariant (every entity, Decimal-exact, source untouched), lineage + baseline-seed 409, rename, archive listing/guards (D-018), comparison diffs/presence/422 (D-019), OpenAPI surface |
 | `tests/test_app.py` | 5 | pass | localhost binding default, CORS list parsing, root endpoint, OpenAPI schema, Swagger UI |
 | `tests/test_health.py` | 3 | pass | 200 + healthy body, migration revision reported after upgrade (compared against the `expected_head` fixture, never a hardcoded id), no credential leakage |
 | `tests/test_migrations.py` | 2 | pass | head applies cleanly; **downgrade → re-upgrade round trip** (including native enum types) restores the full schema |
 | `tests/test_models_finance.py` | 11 | pass | PostgreSQL backstops: FK cascades (household→plans, plan→children, person→accounts), negative-balance CHECK, per-household single-baseline index, allocation uniqueness, date-order and adjustment-pair CHECKs, enum-value rejection, full-graph persistence/relations |
 | `tests/test_schemas_finance.py` | 25 | pass | DATA-001 input validation: dates, amounts, rates, enums, unknown fields, cross-field rules (survivor pairing, one-time flows, adjustment pairs, allocation sets summing to 1) |
 | `frontend/src/App.test.tsx` | 3 | pass | loading state, renders real health data, actionable error when API unreachable |
-| **Total** | **74** | **all pass** | (71 backend + 3 frontend) |
+| **Total** | **85** | **all pass** | (82 backend + 3 frontend) |
 
 `make lint` must be clean (0 findings; the documented E501 exception for
 generated Alembic revisions is DECISIONS D-013).
@@ -86,8 +88,8 @@ Procedure used in sessions 1–2 (repeat after significant changes):
 2. `make backend` → then:
    `curl http://127.0.0.1:8010/api/health` (or open in browser) → 200,
    `"status":"ok"`, `"database":{"connected":true}` and a
-   `migration_revision` equal to the current head (session 2 observed
-   `"0002"`).
+   `migration_revision` equal to the current head (session 4 observed
+   `"0003"`).
 3. `make frontend` → open `http://127.0.0.1:5173/` → health card renders
    with `ok / connected` and the current revision; check `/api/health`
    through port 5173 to prove the proxy path.

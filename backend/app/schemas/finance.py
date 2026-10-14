@@ -283,6 +283,7 @@ class PlanRead(_ReadModel):
     is_baseline: bool
     parent_plan_id: int | None
     notes: str | None
+    archived_at: datetime | None
     created_at: datetime
     updated_at: datetime
 
@@ -398,6 +399,64 @@ class PlanPatch(_StrictModel):
     # merge-validation in PlanCreate guarantees a household never holds two.
     is_baseline: bool | None = None
     parent_plan_id: PersonRef | None = None
+    # True = archive (soft-hide from default listings), False = restore.
+    # Handled by the plan router: the baseline can never be archived and an
+    # archived plan can never be promoted (DECISIONS D-018).
+    archived: bool | None = None
+
+
+class PlanDuplicate(_StrictModel):
+    """Body for ``POST /api/plans/{id}/duplicate`` (DATA-003).
+
+    Omitted ``name`` becomes "<source name> (copy)"; the duplicate always
+    starts as a scenario (``parent_plan_id`` records the source) unless the
+    household has no baseline yet and one is requested.
+    """
+
+    name: Annotated[str, Field(min_length=1, max_length=255)] | None = None
+    is_baseline: bool = False
+
+
+# --- plan comparison (DATA-003, spec §13) -----------------------------------
+
+# Scalar reported for a differing field: JSON-safe normalized value.
+DiffValue = str | int | bool | None
+
+
+class PlanSide(_ReadModel):
+    """Identity of one side of a comparison."""
+
+    id: int
+    name: str
+    is_baseline: bool
+    archived_at: datetime | None
+
+
+class PlanFieldDifference(_ReadModel):
+    """One field where the two plans diverge, keyed by entity name."""
+
+    entity: str  # plan | person | account | liability | income_stream | expense
+    key: str  # the row's name within its entity ("plan" for the plan row)
+    field: str
+    left: DiffValue
+    right: DiffValue
+
+
+class PlanEntityPresence(_ReadModel):
+    """An entity that exists on only one side of the comparison."""
+
+    entity: str
+    key: str
+
+
+class PlanComparison(_ReadModel):
+    """Field-level diff of two plans in the same household (spec §13)."""
+
+    left: PlanSide
+    right: PlanSide
+    differences: list[PlanFieldDifference]
+    only_in_left: list[PlanEntityPresence]
+    only_in_right: list[PlanEntityPresence]
 
 
 class PersonPatch(_StrictModel):

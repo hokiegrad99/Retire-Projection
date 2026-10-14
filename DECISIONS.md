@@ -94,7 +94,8 @@ appending a new entry that references the old ID.
 
 - Scenario storage model: full copies vs. overlay/diff from baseline —
   decide when DATA-003 starts (materially affects schema and comparison UX).
-  *(Partially resolved by D-011: snapshots by default.)*
+  *(Resolved by D-011: snapshots; implemented in DATA-003 — see also
+  D-019 for comparison semantics.)*
 - Splitting runtime vs. dev lockfiles (follow-up of KI-005).
 - Coverage tooling and thresholds (KI-006).
 
@@ -189,3 +190,44 @@ appending a new entry that references the old ID.
 - **Consequences:** any future "replace a unique-constrained child set"
   logic must follow the same delete→flush→insert pattern (noted in
   `NEXT_SESSION.md` pitfalls).
+
+---
+
+## D-018 — 2026-10-13 — Archive semantics: soft-hide with a baseline guard
+
+- **Decision:** `plan.archived_at` (nullable timestamptz, migration
+  `0003`) marks a retired scenario. Archiving is `PATCH
+  /api/plans/{id} {"archived": true}` (sets the timestamp; `false`
+  clears it). Archived plans drop out of `GET
+  /api/households/{id}/plans` by default, return with
+  `?include_archived=true`, and stay individually readable. The
+  **baseline can never be archived** (409) and an **archived plan can
+  never be promoted to baseline** (409) — together the two guards keep
+  "the household's baseline is always live and listed" an invariant.
+- **Alternatives:** hard delete (rejected: loses scenario history and
+  breaks lineage); boolean `is_archived` (rejected: no audit timestamp);
+  allowing archived baselines (rejected: the default listing would hide
+  the one plan a user must always find).
+- **Consequences:** the single-baseline partial unique index is
+  unaffected (archived rows remain in the table); UIs can show
+  "archived since …" from the timestamp; two tests pin the guards.
+
+## D-019 — 2026-10-13 — Plan comparison: match by name, normalized scalars
+
+- **Decision:** `GET /api/plans/{id}/compare/{other_plan_id}` diffs two
+  plans of the same household (422 otherwise, 409-free). Rows of the
+  same entity are matched by `name` (duplicate names pair in id order);
+  unmatched rows report as `only_in_left`/`only_in_right`. Values are
+  normalized to JSON scalars — `Decimal` → exact string, dates → ISO,
+  enum → stored value. Person references and allocation sets are
+  reported as derived fields (owner *name*, canonical
+  `class=weight` summary) because raw FK ids differ across plans by
+  construction.
+- **Alternatives:** matching by row id (rejected: duplicates get new
+  ids); positional matching (rejected: insertion order is not
+  semantic); reporting raw `owner_person_id` (rejected: always differs,
+  pure noise).
+- **Consequences:** renaming an entity surfaces as a presence
+  difference rather than a field diff (documented, acceptable for
+  now); the diff loads both plan graphs into memory — household scale,
+  revisit with PERF-001.
