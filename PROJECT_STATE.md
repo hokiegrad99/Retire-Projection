@@ -100,7 +100,8 @@
   (migrated this session; `plan.archived_at` column present).
 - **Latest build & test results (2026-10-13):** `make check` exit 0 —
   ruff clean, tsc clean, 82 backend + 3 frontend tests passed.
-- **Last known-good commit:** session-4 DATA-003 commit (SHA recorded
-  in the follow-up commit below). Previous: `de9ca48` (session 3 docs
+- **Last known-good commit:** `6b2aaa0` — session 4 (DATA-003, 19 files,
+  verified by `make check` exit 0 with 82+3 tests and a live HTTP smoke
+  of the full scenario flow). Previous: `de9ca48` (session 3 docs
   correction), `c1745a6` (session 3 code).
 - **Version:** 0.4.0 (`backend/app/version.py`, `pyproject.toml`).
